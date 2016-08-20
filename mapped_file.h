@@ -41,7 +41,7 @@ protected:
 	void swap(mapped_file_base &rhs);
 
 	void open(const path_type& p, mapmode flags, size_t length, size_t offset, std::error_code *ec);
-	void create(const path_type &p, size_t new_size); // always creates readwrite.
+	void create(const path_type &p, size_t new_size, std::error_code *ec); // always creates readwrite.
 	void reset();
 
 
@@ -117,6 +117,14 @@ public:
 	}
 	void open(const path_type &p, mapmode flags, size_t length, size_t offset, std::error_code &ec) noexcept {
 		base::open(p, flags, length, offset, &ec);
+	}
+
+	void create(const path_type &p, size_t size) {
+		base::create(p, size, nullptr);
+	}
+
+	void create(const path_type &p, size_t size, std::error_code &ec)  noexcept {
+		base::create(p, size, &ec);
 	}
 
 

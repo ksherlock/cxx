@@ -54,6 +54,7 @@ void mapped_file_base::close() {
 
 void mapped_file_base::open(const path_type& p, mapmode flags, size_t length, size_t offset, std::error_code *ec) {
 
+	if (ec) ec->clear();
 
 	HANDLE fh;
 	HANDLE mh;
@@ -129,7 +130,9 @@ void mapped_file_base::open(const path_type& p, mapmode flags, size_t length, si
 }
 
 
-void mapped_file_base::create(const path_type& p, size_t length) {
+void mapped_file_base::create(const path_type& p, size_t length, std::error_code *ec) {
+
+	if (ec) ec->clear();
 
 	const size_t offset = 0;
 
@@ -152,19 +155,20 @@ void mapped_file_base::create(const path_type& p, size_t length) {
 		nullptr
 	);
 	if (fh == INVALID_HANDLE_VALUE) {
-		return set_or_throw_error(nullptr, "CreateFile");
+		return set_or_throw_error(ec, "CreateFile");
 	}
 
 	auto fh_close = make_unique_resource(fh, CloseHandle);
 
+	if (length == 0) return;
 
 	file_size.QuadPart = length;
 	if (!SetFilePointerEx(fh, file_size, nullptr, FILE_BEGIN));
-	if (!SetEndOfFile(fh)) return set_or_throw_error(nullptr, "SetEndOfFile");
+	if (!SetEndOfFile(fh)) return set_or_throw_error(ec, "SetEndOfFile");
 
 	mh = CreateFileMapping(fh, nullptr, protect, 0, 0, 0);
 	if (mh == INVALID_HANDLE_VALUE) {
-		return set_or_throw_error(nullptr, "CreateFileMapping");
+		return set_or_throw_error(ec, "CreateFileMapping");
 	}
 
 	auto mh_close = make_unique_resource(mh, CloseHandle);
@@ -177,7 +181,7 @@ void mapped_file_base::create(const path_type& p, size_t length) {
 		nullptr);
 
 	if (!_data) {
-		return set_or_throw_error(nullptr, "MapViewOfFileEx");
+		return set_or_throw_error(ec, "MapViewOfFileEx");
 	}
 
 	_file_handle = fh_close.release();
@@ -271,25 +275,28 @@ void mapped_file_base::open(const path_type& p, mapmode flags, size_t length, si
 	_flags = flags;
 }
 
-void mapped_file_base::create(const path_type& p, size_t length) {
+void mapped_file_base::create(const path_type& p, size_t length, std::error_code *ec) {
+
+	if (ec) ec->clear();
 
 	int fd;
 	const size_t offset = 0;
 
 	if (is_open()) close();
 
-	fd = ::open(p.c_str(), O_RDWR | O_CREAT | O_TRUNC);
+	fd = ::open(p.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0666);
 	if (fd < 0) {
-		return set_or_throw_error(nullptr, "open");
+		return set_or_throw_error(ec, "open");
 	}
 
-	//defer([fd](){::close(fd); });
 
 	auto close_fd = make_unique_resource(fd, ::close);
 
 
+	if (length == 0) return;
+
 	if (::ftruncate(fd, length) < 0) {
-		return set_or_throw_error(nullptr, "ftruncate");
+		return set_or_throw_error(ec, "ftruncate");
 	}
 
 
@@ -300,7 +307,7 @@ void mapped_file_base::create(const path_type& p, size_t length) {
 
 	if (_data == MAP_FAILED) {
 		_data = nullptr;
-		return set_or_throw_error(nullptr, "mmap");
+		return set_or_throw_error(ec, "mmap");
 	}
 
 	_fd = close_fd.release();
