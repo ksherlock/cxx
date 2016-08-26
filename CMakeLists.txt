@@ -57,7 +57,7 @@ else()
 	set(FS_NAMESPACE "filesystem")
 endif()
 
-configure_file(cxx_config.h.in ${CMAKE_SOURCE_DIR}/cxx_config.h)
+configure_file(filesystem.h.in ${CMAKE_SOURCE_DIR}/filesystem.h)
 
 if (CXX_HAVE_FILESYSTEM OR CXX_HAVE_EXPERIMENTAL_FILESYSTEM)
 	set(CXX_SRC mapped_file.cpp)
