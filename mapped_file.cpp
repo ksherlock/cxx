@@ -72,9 +72,8 @@ void mapped_file_base::open(const path_type& p, mapmode flags, size_t length, si
 		flags == readonly ? FILE_ATTRIBUTE_READONLY : FILE_ATTRIBUTE_NORMAL,
 		nullptr
 	);
-	if (fh == INVALID_HANDLE_VALUE) {
+	if (fh == INVALID_HANDLE_VALUE)
 		return set_or_throw_error(ec, "CreateFile");
-	}
 
 	auto fh_close = make_unique_resource(fh, CloseHandle);
 
@@ -105,9 +104,8 @@ void mapped_file_base::open(const path_type& p, mapmode flags, size_t length, si
 	}
 
 	mh = CreateFileMapping(fh, nullptr, protect, 0, 0, 0);
-	if (mh == INVALID_HANDLE_VALUE) {
+	if (mh == INVALID_HANDLE_VALUE)
 		return set_or_throw_error(ec, "CreateFileMapping");
-	}
 
 	auto mh_close = make_unique_resource(mh, CloseHandle);
 
@@ -118,9 +116,8 @@ void mapped_file_base::open(const path_type& p, mapmode flags, size_t length, si
 		(DWORD)offset, 
 		length, 
 		nullptr);
-	if (!_data) {
+	if (!_data)
 		return set_or_throw_error(ec, "MapViewOfFileEx");
-	}
 
 
 	_file_handle = fh_close.release();
@@ -154,22 +151,23 @@ void mapped_file_base::create(const path_type& p, size_t length, std::error_code
 		FILE_ATTRIBUTE_NORMAL,
 		nullptr
 	);
-	if (fh == INVALID_HANDLE_VALUE) {
+	if (fh == INVALID_HANDLE_VALUE)
 		return set_or_throw_error(ec, "CreateFile");
-	}
 
 	auto fh_close = make_unique_resource(fh, CloseHandle);
 
 	if (length == 0) return;
 
 	file_size.QuadPart = length;
-	if (!SetFilePointerEx(fh, file_size, nullptr, FILE_BEGIN));
-	if (!SetEndOfFile(fh)) return set_or_throw_error(ec, "SetEndOfFile");
+	if (!SetFilePointerEx(fh, file_size, nullptr, FILE_BEGIN))
+		return set_or_throw_error(ec, "SetFilePointerEx");
+
+	if (!SetEndOfFile(fh))
+		return set_or_throw_error(ec, "SetEndOfFile");
 
 	mh = CreateFileMapping(fh, nullptr, protect, 0, 0, 0);
-	if (mh == INVALID_HANDLE_VALUE) {
+	if (mh == INVALID_HANDLE_VALUE)
 		return set_or_throw_error(ec, "CreateFileMapping");
-	}
 
 	auto mh_close = make_unique_resource(mh, CloseHandle);
 
@@ -180,9 +178,8 @@ void mapped_file_base::create(const path_type& p, size_t length, std::error_code
 		length, 
 		nullptr);
 
-	if (!_data) {
+	if (!_data)
 		return set_or_throw_error(ec, "MapViewOfFileEx");
-	}
 
 	_file_handle = fh_close.release();
 	_map_handle = mh_close.release();

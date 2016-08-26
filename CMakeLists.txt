@@ -25,7 +25,7 @@ if (CXX_HAVE_FILESYSTEM)
 		int main() { return 0; }
 		"
 		CXX_STD_FILESYSTEM_NAMESPACE)
-elsif(CXX_HAVE_EXPERIMENTAL_FILESYSTEM)
+elseif(CXX_HAVE_EXPERIMENTAL_FILESYSTEM)
 	CHECK_CXX_SOURCE_COMPILES("
 		#include <experimental/filesystem>
 		namespace fs = std::experimental::filesystem;
@@ -57,7 +57,7 @@ else()
 	set(FS_NAMESPACE "filesystem")
 endif()
 
-configure_file(filesystem.h.in ${CMAKE_SOURCE_DIR}/filesystem.h)
+configure_file(filesystem.h.in ${CMAKE_CURRENT_SOURCE_DIR}/filesystem.h)
 
 if (CXX_HAVE_FILESYSTEM OR CXX_HAVE_EXPERIMENTAL_FILESYSTEM)
 	set(CXX_SRC mapped_file.cpp)
