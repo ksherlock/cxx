@@ -1,11 +1,7 @@
 #ifndef __mapped_file_h__
 #define __mapped_file_h__
 
-#ifdef HAVE_TSFS
-#include <filesystem>
-#else
-#include <string>
-#endif
+#include "filesystem.h"
 
 #include <cstddef>
 #include <system_error>
@@ -13,11 +9,7 @@
 class mapped_file_base {
 public:
 
-#ifdef HAVE_TSFS
-	typedef std::filesystem::path path_type ;
-#else
-	typedef std::string path_type ;
-#endif
+	typedef FS_NAMESPACE::path path_type;
 
 	enum mapmode { readonly, readwrite, priv };
 

@@ -1,0 +1,9 @@
+/* generated from cxx_config.h.in by CMake */
+
+#cmakedefine CXX_HAVE_FILESYSTEM
+#cmakedefine CXX_HAVE_EXPERIMENTAL_FILESYSTEM
+#cmakedefine CXX_STD_FILESYSTEM_NAMESPACE
+#cmakedefine CXX_STD_EXPERIMENTAL_FILESYSTEM_NAMESPACE
+
+#cmakedefine FS_HEADER @FS_HEADER@
+#cmakedefine FS_NAMESPACE @FS_NAMESPACE@
