@@ -51,10 +51,13 @@ endif()
 
 if(CXX_STD_FILESYSTEM_NAMESPACE)
 	set(FS_NAMESPACE "std::filesystem")
+	set(IMPORT_FS_NAMESPACE "namespace filesystem = std::filesystem;")
 elseif(CXX_HAVE_EXPERIMENTAL_FILESYSTEM)
 	set(FS_NAMESPACE "std::experimental::filesystem")
+	set(IMPORT_FS_NAMESPACE "namespace filesystem = std::experimental::filesystem;")
 else()
 	set(FS_NAMESPACE "filesystem")
+	set(IMPORT_FS_NAMESPACE " ")
 endif()
 
 configure_file(filesystem.h.in ${CMAKE_CURRENT_SOURCE_DIR}/filesystem.h)

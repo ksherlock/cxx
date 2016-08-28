@@ -12,6 +12,7 @@ public:
 	typedef FS_NAMESPACE::path path_type;
 
 	enum mapmode { readonly, readwrite, priv };
+	enum createmode { truncate, exclusive };
 
 	void close();
 
