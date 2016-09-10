@@ -281,5 +281,35 @@ namespace filesystem {
 		return _path.compare(s);
 	}
 
+	// replace components.
+
+	path& path::replace_extension(const path& replacement) {
+		if (!_info.valid) study();
+
+		// poorly defined if this is special, like / or .
+		if (!_info.special) {
+			// _info.extension 
+			_path.resize(_info.extension);
+			if (!replacement.empty()) {
+				// replacement may or may not have a leading .
+				if (replacement._path.front() != '.')
+					_path.push_back('.');
+				_path += replacement._path;
+			}
+		}
+		return *this;
+	}
+
+
+	path& path::replace_extension() {
+		if (!_info.valid) study();
+
+		// poorly defined if this is special, like / or .
+		if (!_info.special) {
+			// _info.extension 
+			_path.resize(_info.extension);
+		}
+		return *this;
+	}
 
 }
