@@ -6,23 +6,6 @@
 #include "unique_resource.h"
 
 namespace {
-	class defer {
-	public:
-		typedef std::function<void()> FX;
-		defer() = default;
-
-		defer(FX fx) : _fx(fx) {}
-		defer(const defer &) = delete;
-		defer(defer &&) = default;
-		defer & operator=(const defer &) = delete;
-		defer & operator=(defer &&) = default;
-
-		void cancel() { _fx = nullptr;  }
-		~defer() { if (_fx) _fx(); }
-	private:
-		FX _fx;
-	};
-
 
 	void set_or_throw_error(std::error_code *ec, int error, const std::string &what) {
 		if (ec) *ec = std::error_code(error, std::system_category());
@@ -240,9 +223,7 @@ void mapped_file_base::open(const path_type& p, mapmode flags, size_t length, si
 		return set_or_throw_error(ec, "open");
 	}
 
-	//defer([fd](){::close(fd); });
 	auto close_fd = make_unique_resource(fd, ::close);
-
 
 
 	if (length == -1) {
