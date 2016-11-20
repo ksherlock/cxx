@@ -82,7 +82,7 @@ void mapped_file_base::open(const path_type& p, mapmode flags, size_t length, si
 		break;
 	case priv:
 		protect = PAGE_WRITECOPY;
-		access = FILE_MAP_WRITE;
+		access = FILE_MAP_COPY;
 		break;
 	}
 
