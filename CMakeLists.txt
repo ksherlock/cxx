@@ -60,7 +60,7 @@ else()
 	set(IMPORT_FS_NAMESPACE " ")
 endif()
 
-configure_file(filesystem.h.in ${CMAKE_CURRENT_SOURCE_DIR}/filesystem.h)
+configure_file(filesystem.h.in ${CMAKE_CURRENT_BINARY_DIR}/cmake_filesystem.h)
 
 if (CXX_HAVE_FILESYSTEM OR CXX_HAVE_EXPERIMENTAL_FILESYSTEM)
 	set(CXX_SRC mapped_file.cpp)
@@ -71,3 +71,5 @@ endif()
 
 
 add_library(CXX_LIB ${CXX_SRC})
+
+target_include_directories(CXX_LIB PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})

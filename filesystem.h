@@ -1,5 +1,11 @@
-/* default header.  will be replaced if CMake is used. */
-/* use git update-index --assume-unchanged filesystem.h to ignore changes */
+#ifndef __filesystem_stub_h__
+#define __filesystem_stub_h__
+
+#if __has_include("cmake_filesystem.h")
+#include "cmake_filesystem.h"
+#else
+
+/* default settings ... */
 
 #define FS_HEADER "cxx_filesystem.h"
 #define FS_NAMESPACE filesystem
@@ -8,3 +14,7 @@
 #include FS_HEADER
 
 IMPORT_FS_NAMESPACE
+
+#endif
+
+#endif
