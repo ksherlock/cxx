@@ -1,7 +1,9 @@
 #ifndef __filesystem_stub_h__
 #define __filesystem_stub_h__
 
-#if __has_include("cmake_filesystem.h")
+//#if __has_include("cmake_filesystem.h")
+//#include "cmake_filesystem.h"
+#ifdef cmake_filesystem_h
 #include "cmake_filesystem.h"
 #else
 

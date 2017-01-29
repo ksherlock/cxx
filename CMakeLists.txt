@@ -46,7 +46,7 @@ if(CXX_HAVE_FILESYSTEM)
 elseif(CXX_HAVE_EXPERIMENTAL_FILESYSTEM)
 	set(FS_HEADER "<experimental/filesystem>")
 else()
-	set(FS_HEADER "\"cxx_filesystem.h\"")
+	set(FS_HEADER "<cxx/cxx_filesystem.h>")
 endif()
 
 if(CXX_STD_FILESYSTEM_NAMESPACE)
@@ -63,13 +63,14 @@ endif()
 configure_file(filesystem.h.in ${CMAKE_CURRENT_BINARY_DIR}/cmake_filesystem.h)
 
 if (CXX_HAVE_FILESYSTEM OR CXX_HAVE_EXPERIMENTAL_FILESYSTEM)
-	set(CXX_SRC mapped_file.cpp)
+	set(CXX_SRC src/mapped_file.cpp)
 else()
-	set(CXX_SRC mapped_file.cpp filesystem.cpp path.cpp directory_iterator.cpp)
+	set(CXX_SRC src/mapped_file.cpp src/filesystem.cpp src/path.cpp src/directory_iterator.cpp)
 endif()
 
 
 
 add_library(CXX_LIB ${CXX_SRC})
 
-target_include_directories(CXX_LIB PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(CXX_LIB PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/include/)
+target_compile_options(CXX_LIB PUBLIC -Dcmake_filesystem_h)
