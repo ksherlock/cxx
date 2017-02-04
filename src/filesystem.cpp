@@ -23,7 +23,7 @@ namespace filesystem {
 		{
 			auto rv = fx(std::forward<Args>(args)...);
 			if (rv < 0) {
-				ec = error_code(errno, std::system_category());
+				ec = error_code(errno, std::generic_category());
 			} else {
 				ec.clear();
 			}
@@ -34,7 +34,7 @@ namespace filesystem {
 		int fs_stat(const path &p, struct stat *buf, error_code &ec) {
 			int rv = stat(p.c_str(), buf);
 			if (rv < 0) {
-				ec = error_code(errno, std::system_category());
+				ec = error_code(errno, std::generic_category());
 			}
 			else {
 				ec.clear();
@@ -45,7 +45,7 @@ namespace filesystem {
 		int fs_lstat(const path &p, struct stat *buf, error_code &ec) {
 			int rv = lstat(p.c_str(), buf);
 			if (rv < 0) {
-				ec = error_code(errno, std::system_category());
+				ec = error_code(errno, std::generic_category());
 			}
 			else {
 				ec.clear();
@@ -117,7 +117,7 @@ namespace filesystem {
 		int rv = stat(p.c_str(), &st);
 		if (rv < 0) {
 			int e = errno;
-			ec = error_code(e, std::system_category());
+			ec = error_code(e, std::generic_category());
 
 			switch(e){
 				case ENOENT:
@@ -223,7 +223,7 @@ namespace filesystem {
 			return false;
 		}
 
-		ec = error_code(e, std::system_category());
+		ec = error_code(e, std::generic_category());
 		return false;
 	}
 
@@ -275,7 +275,7 @@ namespace filesystem {
 		cp = ::getcwd(buffer, PATH_MAX);
 		if (cp) return path(cp);
 
-		ec = error_code(errno, std::system_category());
+		ec = error_code(errno, std::generic_category());
 		return path();
 	}
 
@@ -328,7 +328,7 @@ namespace filesystem {
 		ec.clear();
 		cp = realpath(p.c_str(), buffer);
 		if (cp) return path(cp);
-		ec = error_code(errno, std::system_category());
+		ec = error_code(errno, std::generic_category());
 		return path();
 	}
 
@@ -346,7 +346,7 @@ namespace filesystem {
 			cp = realpath(tmp.c_str(), buffer);
 		}
 		if (cp) return path(cp);
-		ec = error_code(errno, std::system_category());
+		ec = error_code(errno, std::generic_category());
 		return path();
 	}
 

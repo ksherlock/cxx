@@ -124,7 +124,7 @@ namespace filesystem {
 		DIR *dp = opendir(p.c_str());
 		if (!dp)
 		{
-				ec = error_code(errno, std::system_category());
+				ec = error_code(errno, std::generic_category());
 				return;
 		}
 
@@ -162,7 +162,7 @@ namespace filesystem {
 				rv = readdir_r(dp, &entry, &result);
 				if (rv != 0)
 				{
-					ec = error_code(errno, std::system_category());
+					ec = error_code(errno, std::generic_category());
 					_imp.reset();
 					break;
 				}
