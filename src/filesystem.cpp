@@ -292,7 +292,26 @@ namespace filesystem {
 	}
 
 
+	path absolute(const path& p, const path& base) {
+		if (p.is_absolute()) return p;
+		auto tmp = absolute(base);
+		tmp /= p;
+		return tmp;
+	}
 
+	path absolute(const path &p) {
+		if (p.is_absolute()) return p;
+		return absolute(p, current_path());
+	}
+
+
+	path canonical(const path& p) {
+		error_code ec;
+		path rv = canonical(p, ec);
+		if (ec) 
+			throw filesystem_error("filesystem::canonical", p, ec);
+		return rv;
+	}
 
 	path canonical(const path& p, const path& base) {
 		error_code ec;

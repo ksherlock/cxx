@@ -510,9 +510,11 @@ namespace filesystem {
 	void current_path(const path& p);
 	void current_path(const path& p, error_code& ec) noexcept;
 
-	path absolute(const path& p, const path& base=current_path());
+	path absolute(const path& p);
+	path absolute(const path& p, const path& base);
 
-	path canonical(const path& p, const path& base = current_path());
+	path canonical(const path& p);
+	path canonical(const path& p, const path& base);
 	path canonical(const path& p, error_code& ec);
 	path canonical(const path& p, const path& base, error_code& ec);
 
