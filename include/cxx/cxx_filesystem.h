@@ -703,7 +703,7 @@ namespace filesystem {
 	path system_complete(const path& p);
 	path system_complete(const path& p, error_code& ec);
 	path temp_directory_path();
-	path temp_directory_path(error_code& ec);
+	path temp_directory_path(error_code& ec) noexcept;
 
 
 

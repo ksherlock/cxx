@@ -112,49 +112,6 @@ namespace filesystem {
 	file_status status(const path& p, error_code& ec) noexcept {
 
 		return status_common(fs_stat, p, ec);
-/*
-		struct stat st;
-		int rv = stat(p.c_str(), &st);
-		if (rv < 0) {
-			int e = errno;
-			ec = error_code(e, std::generic_category());
-
-			switch(e){
-				case ENOENT:
-				case ENOTDIR:
-					return file_status(file_type::not_found);
-
-				case EOVERFLOW:
-					return file_status(file_type::unknown);
-
-				//case ENAMETOOLONG: ???
-				// case ELOOP ?
-
-				default:
-					return file_status(file_type::none);
-			}
-		}
-
-		ec.clear();
-		perms prms = static_cast<perms>(st.st_mode & perms::mask);
-
-		if (S_ISREG(st.st_mode))
-			return file_status(file_type::regular, prms);
-
-		if (S_ISDIR(st.st_mode))
-			return file_status(file_type::directory, prms);
-
-		if (S_ISBLK(st.st_mode))
-			return file_status(file_type::block, prms);
-
-		if (S_ISFIFO(st.st_mode))
-			return file_status(file_type::fifo, prms);
-
-		if (S_ISSOCK(st.st_mode))
-			return file_status(file_type::socket, prms);
-
-		return file_status(file_type::unknown, prms);
-*/
 	}
 
 	file_status symlink_status(const path& p) {
@@ -243,8 +200,7 @@ namespace filesystem {
 	bool remove(const path& p) {
 		error_code ec;
 
-		if (syscall(ec, ::remove, p.c_str()) < 0)
-		{
+		if (syscall(ec, ::remove, p.c_str()) < 0) {
 			throw filesystem_error("filesystem::remove", p, ec);
 		}
 		return true;
@@ -289,6 +245,18 @@ namespace filesystem {
 	void current_path(const path& p, error_code& ec) noexcept {
 
 		syscall(ec, ::chdir, p.c_str());
+	}
+
+	path temp_directory_path() {
+		return "/tmp";
+	}
+
+	path temp_directory_path( std::error_code& ec ) noexcept {
+		/* todo - check $TMPDIR, $TMP, $TEMP, $TEMPDIR,
+		 * check if directory exists and is writable */
+		ec.clear();
+
+		return "/tmp";
 	}
 
 
