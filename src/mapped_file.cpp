@@ -19,8 +19,17 @@ namespace {
 
 namespace {
 
+	/*
+	 * allocating a new string could reset GetLastError() to 0.
+	 */
+	void set_or_throw_error(std::error_code *ec, const char *what) {
+		auto e = GetLastError();
+		set_or_throw_error(ec, e, what);
+	}
+
 	void set_or_throw_error(std::error_code *ec, const std::string &what) {
-		set_or_throw_error(ec, GetLastError(), what);
+		auto e = GetLastError();
+		set_or_throw_error(ec, e, what);
 	}
 
 }
@@ -182,6 +191,11 @@ void mapped_file_base::create(const path_type& p, size_t length, std::error_code
 #include <cerrno>
 
 namespace {
+
+
+	void set_or_throw_error(std::error_code *ec, const char *what) {
+		set_or_throw_error(ec, errno, what);
+	}
 
 	void set_or_throw_error(std::error_code *ec, const std::string &what) {
 		set_or_throw_error(ec, errno, what);
