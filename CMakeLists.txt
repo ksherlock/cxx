@@ -74,3 +74,9 @@ add_library(CXX_LIB ${CXX_SRC})
 
 target_include_directories(CXX_LIB PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/include/)
 target_compile_options(CXX_LIB PUBLIC -Dcmake_filesystem_h)
+
+if (CXX_HAVE_EXPERIMENTAL_FILESYSTEM AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+        # "Linking to libstdc++fs is required for use of the 
+        # Filesystem library extensions in <experimental/filesystem>."
+        target_link_libraries(CXX_LIB -lstdc++fs)
+endif()
