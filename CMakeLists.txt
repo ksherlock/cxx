@@ -80,3 +80,10 @@ if (CXX_HAVE_EXPERIMENTAL_FILESYSTEM AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
         # Filesystem library extensions in <experimental/filesystem>."
         target_link_libraries(CXX_LIB -lstdc++fs)
 endif()
+
+add_executable(path_test src/path_test.cpp)
+target_link_libraries(path_test CXX_LIB)
+
+enable_testing()
+add_test(NAME path_test COMMAND path_test)
+
