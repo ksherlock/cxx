@@ -312,4 +312,55 @@ namespace filesystem {
 		return *this;
 	}
 
+
+	size_t path::iterator::next() {
+		if (_index == 0 && _data->front() == separator) {
+			_current = "/";
+			return 1;
+		}
+		auto pos = _data->find(separator, _index);
+		if (pos == _data->npos) {
+			_current = _data->substr(_index);
+			return _data->length();
+		}
+		_current = _data->substr(_index, pos - _index);
+		return pos;
+
+	}
+
+	path::iterator& path::iterator::operator++() {
+		_current.clear();
+		if (!_data || _index == _data->npos) return *this;
+		if (_index == _data->size()) {
+			_index = _data->npos; return *this;
+		}
+
+		// skip /s
+		if ((*_data)[_index] == separator) {
+			while (_index < _data->size() && (*_data)[_index] == separator)
+				++_index;
+			if (_index == _data->size()) {
+				_current = ".";
+				return *this;
+			}
+		}
+
+		_index = next();
+		return *this;
+	}
+
+	bool path::iterator::operator==(const iterator &rhs) const noexcept {
+		if (_data == rhs._data && _index == rhs._index) return true;
+		if (_data == nullptr) {
+			if (rhs._index == rhs._data->npos) return true;
+		}
+		if (rhs._data == nullptr) {
+			if (_index == _data->npos) return true;
+		}
+		return false;
+	}
+	bool path::iterator::operator!=(const iterator &rhs) const noexcept {
+		return !(*this == rhs);
+	}
+
 }

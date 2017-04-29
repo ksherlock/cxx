@@ -285,10 +285,44 @@ namespace filesystem {
 		// iterators
 		class iterator;
 		typedef iterator const_iterator;
-		iterator begin() const;
-		iterator end() const;
+
+
+		// standard says bi-directional.  this is currently an input-iterator.
+		class iterator : public std::iterator<std::input_iterator_tag, path> {
+		private:
+			const string_type *_data = nullptr;
+			string_type _current;
+			size_t _index = 0;
+			size_t next();
+		public:
+			iterator() = default;
+			iterator(const path &p) {
+				if (!p.empty()) {
+					_data = &p._path;
+					_index = next();
+				}
+			}
+			iterator(const iterator &) = default;
+			iterator(iterator &&) = default;
+
+			iterator &operator=(const iterator &) = default;
+			iterator &operator=(iterator &&) = default;
+
+			path operator *() { return _current; }
+			iterator &operator++();
+
+			bool operator==(const iterator &rhs) const noexcept;
+			bool operator!=(const iterator &rhs) const noexcept;
+
+		};
+
+		iterator begin() const { return iterator(*this); }
+		iterator end() const { return iterator(); }
+
 
 	private:
+
+		friend class iterator;
 
 		void invalidate() const {
 			_info.valid = false;
