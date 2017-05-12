@@ -79,7 +79,7 @@ namespace filesystem {
 			}
 
 			ec.clear();
-			perms prms = static_cast<perms>(st.st_mode & perms::mask);
+			perms prms = static_cast<perms>(st.st_mode) & perms::mask;
 
 			if (S_ISREG(st.st_mode))
 				return file_status(file_type::regular, prms);

@@ -438,7 +438,7 @@ namespace filesystem {
 		unknown = 8
 	};
 
-	enum perms {
+	enum class perms {
 
 		none = 0,
 		owner_read = 0400,
@@ -470,6 +470,33 @@ namespace filesystem {
 
 	};
 
+	inline perms operator &(perms a, perms b) noexcept {
+		return static_cast<perms>(static_cast<unsigned>(a) & static_cast<unsigned>(b));
+	}
+
+	inline perms operator |(perms a, perms b) noexcept {
+		return static_cast<perms>(static_cast<unsigned>(a) | static_cast<unsigned>(b));
+	}
+
+	inline perms operator ^(perms a, perms b) noexcept {
+		return static_cast<perms>(static_cast<unsigned>(a) ^ static_cast<unsigned>(b));
+	}
+
+	inline perms operator ~(perms a) noexcept {
+		return static_cast<perms>(~ static_cast<unsigned>(a));
+	}
+
+	inline perms& operator &=(perms &a, perms b) noexcept {
+		return a = a & b;
+	}
+
+	inline perms& operator |=(perms &a, perms b) noexcept {
+		return a = a | b;
+	}
+
+	inline perms& operator ^=(perms &a, perms b) noexcept {
+		return a = a ^ b;
+	}
 
 	class file_status
 	{
@@ -538,6 +565,34 @@ namespace filesystem {
 		create_symlinks = 128,
 		create_hard_links = 256
 	};
+
+	inline copy_options operator &(copy_options a, copy_options b) noexcept {
+		return static_cast<copy_options>(static_cast<unsigned>(a) & static_cast<unsigned>(b));
+	}
+
+	inline copy_options operator |(copy_options a, copy_options b) noexcept {
+		return static_cast<copy_options>(static_cast<unsigned>(a) | static_cast<unsigned>(b));
+	}
+
+	inline copy_options operator ^(copy_options a, copy_options b) noexcept {
+		return static_cast<copy_options>(static_cast<unsigned>(a) ^ static_cast<unsigned>(b));
+	}
+
+	inline copy_options operator ~(copy_options a) noexcept {
+		return static_cast<copy_options>(~static_cast<unsigned>(a));
+	}
+
+	inline copy_options& operator &=(copy_options &a, copy_options b) noexcept {
+		return a = a & b;
+	}
+
+	inline copy_options& operator |=(copy_options &a, copy_options b) noexcept {
+		return a = a | b;
+	}
+
+	inline copy_options& operator ^=(copy_options &a, copy_options b) noexcept {
+		return a = a ^ b;
+	}
 
 	path current_path();
 	path current_path(error_code& ec);
