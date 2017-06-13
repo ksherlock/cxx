@@ -16,7 +16,7 @@ public:
 	}
 	
 	operator bool() const {
-		return _begin != npos;
+		return _begin != std::string::npos;
 	}
 
 	string_splitter &operator++() {
@@ -35,16 +35,17 @@ public:
 private:
 	void increment() {
 		_str.clear();
-		if (_begin == npos) return;
-		if (_end == npos) { _begin = _end; return; }
+		if (_begin == std::string::npos) return;
+		if (_end == std::string::npos) { _begin = _end; return; }
 
 		_begin = _end + 1;
 		_end = _parent.find(_sep, _begin);
-		auto count = _end == npos ? _end : _end - _begin;
+		auto count = _end == std::string::npos ? _end : _end - _begin;
 		_str = _parent.substr(_begin, count);
 	}
 
-	const static auto npos = std::string::npos;
+	// msvc won't do this until c++17
+	//const static auto npos = std::string::npos;
 	std::string _str;
 	const std::string &_parent;
 	char _sep;
