@@ -177,7 +177,7 @@ namespace filesystem {
 
 		if (e == EEXIST && is_directory(p, tmp)) {
 			ec.clear();
-			return false;
+			return true;
 		}
 
 		ec = error_code(e, std::generic_category());
