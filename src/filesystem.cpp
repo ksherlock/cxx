@@ -164,9 +164,10 @@ namespace filesystem {
 
 	bool create_directory(const path& p, error_code& ec) noexcept {
 
+		ec.clear();
+
 		int rv = ::mkdir(p.c_str(), S_IRWXU|S_IRWXG|S_IRWXO);
 		if (rv == 0) {
-			ec.clear();
 			return true;
 		}
 
@@ -176,8 +177,7 @@ namespace filesystem {
 		// special case -- not an error if the directory already exists.
 
 		if (e == EEXIST && is_directory(p, tmp)) {
-			ec.clear();
-			return true;
+			return false;
 		}
 
 		ec = error_code(e, std::generic_category());
