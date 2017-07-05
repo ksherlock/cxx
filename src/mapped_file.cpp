@@ -73,7 +73,7 @@ void mapped_file_base::open(const path_type& p, mapmode flags, size_t length, si
 	if (length == -1) {
 		LARGE_INTEGER file_size;
 		GetFileSizeEx(fh, &file_size);
-		length = file_size.QuadPart;
+		length = (size_t)file_size.QuadPart;
 	}
 
 	if (length == 0) return;
