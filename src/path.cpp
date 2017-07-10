@@ -4,6 +4,7 @@
 
 namespace filesystem {
 
+
 	namespace {
 		const path::value_type separator = '/';
 
@@ -11,6 +12,18 @@ namespace filesystem {
 		const path path_dot = ".";
 		const path path_dotdot = "..";
 		const path path_sep = "/";
+		const path path_empty = "";
+
+		// special flags
+		enum {
+			none = 0,
+			explicit_dot,
+			implicit_dot,
+			explicit_dotdot,
+			slash_only
+		};
+
+
 	}
 
 	void path::study() const {
@@ -20,7 +33,7 @@ namespace filesystem {
 		if (length == 0)
 		{
 			_info.valid = true;
-			_info.special = 0;
+			_info.special = none;
 			_info.stem = _info.extension = 0;
 			return;
 		}
@@ -32,10 +45,11 @@ namespace filesystem {
 		// if the path ends with a / (but contains a non-/ char),
 		// the filename is .
 
+		value_type special = none;
 		if (back == separator) {
-			value_type special = '.';
+			special = implicit_dot;
 			if (_path.find_first_not_of(separator) == _path.npos)
-				special = separator;
+				special = slash_only;
 
 			_info.valid = true;
 			_info.extension = length;
@@ -55,22 +69,27 @@ namespace filesystem {
 				break;
 			}
 		}
-
+		// .profile -> stem = ".profile", extension = ""
+		if (extension == stem) extension = length;
 
 		// check for special cases (part 2)
 		// ".." and "." are not extensions.
 		if (back == '.') {
 			int xlength = length - stem;
-			if (xlength == 1) 
+			if (xlength == 1) {
 				extension = length;
-			if (xlength == 2 && _path[stem] == '.')
+				special = explicit_dot;
+			}
+			if (xlength == 2 && _path[stem] == '.') {
 				extension = length;
+				special = explicit_dotdot;
+			}
 		}
 
 		_info.valid = true;
 		_info.stem = stem;
 		_info.extension = extension;
-		_info.special = 0;
+		_info.special = special;
 	}
 
 
@@ -87,61 +106,44 @@ namespace filesystem {
 #endif
 
 
-	// private.  neither this->_path nor s are empty.
-	path &path::append_common(const std::string &s)
-	{
-		invalidate();
-		if (_path.back() != separator && s.front() != separator)
-			_path.push_back(separator);
+	path &path::append_common(const std::string &s) {
 
-		_path.append(s);
+		// "foo" / "" -> "foo/"
+		if (_path.back() != separator) _path.push_back(separator);
 
-		return *this;
-	}
-
-	path& path::append(const path& p)
-	{
-		if (p.empty()) return *this;
-
-		if (empty()) {
-			return (*this = p); 
-		}
-
-		invalidate();
-
-		// check for something stupid like xx.append(xx);
-		if (&p == this) {
-			return append_common(string_type(p._path));
-		}
-
-		return append_common(p._path);
-	}
-
-	path& path::append(const string_type &s)
-	{
 		if (s.empty()) return *this;
-		invalidate();
-
-		if (empty()) {
-			_path = s;
-			return *this;
-		}
-
 
 		if (&s == &_path) {
 			string_type tmp(s);
-			if (_path.back() != separator && tmp[0] != separator)
-				_path.push_back(separator);
 			_path.append(tmp);
-			return *this;
+		} else {
+			_path.append(s);
 		}
 
-		if (_path.back() != separator && s[0] != separator)
-			_path.push_back(separator);
-
-		_path.append(s);
-
 		return *this;
+
+	}
+
+
+	path& path::append(const path& p)
+	{
+		if (empty() || p.is_absolute()) {
+			return (*this = p);
+		}
+		return append_common(p._path);
+	}
+
+
+	path& path::append(const string_type &s)
+	{
+
+		bool is_absolute = !s.empty() && s.front() == separator;
+		if (empty() || is_absolute) {
+			invalidate();
+			_path = s;
+			return *this;
+		}
+		return append_common(s);
 	}
 
 
@@ -152,8 +154,8 @@ namespace filesystem {
 		if (empty()) return *this;
 		if (!_info.valid) study();
 
-		if (_info.special == separator) return path_sep;
-		if (_info.special == '.') return path_dot;
+		if (_info.special == separator) return path_empty;
+		if (_info.special == implicit_dot) return path_empty;
 
 		if (_info.stem == 0) return *this;
 		return _path.substr(_info.stem);
@@ -166,8 +168,8 @@ namespace filesystem {
 		if (empty()) return *this;
 		if (!_info.valid) study();
 
-		if (_info.special == separator) return path_sep;
-		if (_info.special == '.') return path_dot;
+		if (_info.special == separator) return path_empty;
+		if (_info.special == implicit_dot) return path_empty;
 
 		return _path.substr(_info.stem, _info.extension - _info.stem);
 	}
@@ -190,7 +192,7 @@ namespace filesystem {
 
 		if (!_info.valid) study();
 
-		if (_info.special == '/') return false;
+		if (_info.special == slash_only) return false;
 
 		return _path.find(separator) != _path.npos;
 	}
@@ -211,7 +213,7 @@ namespace filesystem {
 		if (!_info.valid) study();
 
 		// "/" is a file of "/" with a parent of ""
-		if (_info.special == separator) return path();
+		if (_info.special == slash_only) return path_empty;
 
 		// stem starts at 0, eg "abc"
 		if (!_info.stem) return path();
@@ -280,6 +282,37 @@ namespace filesystem {
 	int path::compare(const value_type* s) const {
 		return _path.compare(s);
 	}
+
+#pragma mark - modifiers
+
+	path& path::remove_filename() {
+
+		if (empty()) return *this;
+		if (!_info.valid) study();
+
+		if (_info.special == slash_only) return *this;
+
+		_path.resize(_info.stem);
+		invalidate();
+		return *this;
+	}
+
+	path& path::replace_filename(const path &replacement) {
+		if (!_info.valid) study();
+
+		if (_info.special == slash_only || _info.special == implicit_dot) {
+			append(replacement);
+			return *this;
+		}
+		if (empty() || _info.stem == 0) {
+			return *this = replacement;
+		}
+
+		_path.resize(_info.stem);
+		_path += replacement._path;
+		invalidate();
+		return *this;
+	} 
 
 	// replace components.
 
