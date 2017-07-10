@@ -216,7 +216,7 @@ namespace filesystem {
 		if (_info.special == slash_only) return path_empty;
 
 		// stem starts at 0, eg "abc"
-		if (!_info.stem) return path();
+		if (!_info.stem) return path_empty;
 
 
 		auto tmp = _path.substr(0, _info.stem - 1);
@@ -232,7 +232,7 @@ namespace filesystem {
 		// for unix, root directory is / or "".
 		if (empty()) return *this;
 
-		return _path.front() == '/' ? path_sep : path();
+		return _path.front() == '/' ? path_sep : path_empty;
 	}
 
 	path path::root_name() const {
@@ -329,6 +329,7 @@ namespace filesystem {
 					_path.push_back('.');
 				_path += replacement._path;
 			}
+			invalidate();
 		}
 		return *this;
 	}
@@ -341,6 +342,7 @@ namespace filesystem {
 		if (!_info.special) {
 			// _info.extension 
 			_path.resize(_info.extension);
+			invalidate();
 		}
 		return *this;
 	}
