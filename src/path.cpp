@@ -363,6 +363,69 @@ namespace filesystem {
 
 	}
 
+#pragma mark - generation
+
+	path path::lexically_normal() const {
+
+		if (empty()) return *this;
+
+		if (!_info.valid) study();
+
+		path rv;
+
+
+		/*
+		 *  remove [ . / ]
+		 *  remove [ xxx / .. /? ]
+		 *  remove [ / .. $ ]
+		 */
+
+		bool append_slash = false;
+		for (auto p : *this) {
+			auto cp = p.c_str();
+			if (cp[0] == 0) continue;
+			if (cp[0] == '.') {
+				if (cp[1] == 0) continue;
+				if (cp[1] == '.' && cp[2] == 0) {
+
+
+					if (!rv._info.valid) rv.study();
+
+					// .. is ok
+					// ../.. is ok
+					// file/.. is not.
+					// /.. is not
+
+
+					if (rv.empty() || rv._info.special == explicit_dotdot) {
+						append_slash = false;
+						rv /= p;						
+					} else {
+						append_slash = true;
+						rv.remove_filename();
+					}
+					continue;
+
+				}
+			}
+			append_slash = false;
+			rv /= p;
+		}
+
+		if (append_slash) rv /= "";
+
+		// special case - don't remove explicit dot @ end.
+		if (_info.special == explicit_dot) rv /= ".";
+		// but implicit dot means there is a trailing / which should be preserved.
+		if (_info.special == implicit_dot) rv /= "";
+
+		// special case empty string -> '.'
+		if (rv.empty()) rv = path_dot;
+		return rv;
+	}
+
+#pragma mark - iteration
+
 	path::iterator& path::iterator::operator++() {
 		_current.clear();
 		if (!_data || _index == _data->npos) return *this;

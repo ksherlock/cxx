@@ -87,14 +87,15 @@ TEST_CASE("fs.path.query", "[std]") {
 	}
 }
 
-#if 0
-/* not yet implemented */
 TEST_CASE("fs.path.gen", "[std]") {
 
 	SECTION("lexically_normal") {
 		CHECK(fs::path("foo/./bar/..").lexically_normal().native() == "foo/");
 		CHECK(fs::path("foo/.///bar/../").lexically_normal().native() == "foo/");	
 	}
+
+#if 0
+	/* not yet implemented */
 
 	SECTION("lexically_relative") {
 
@@ -106,9 +107,29 @@ TEST_CASE("fs.path.gen", "[std]") {
 		TEST_CASE(fs::path("a/b").lexically_relative("c/d").native() == "../../a/b");
 
 	}
+#endif
 
 }
-#endif
+
+TEST_CASE("lexically_normal", "[path]") {
+
+		CHECK(fs::path("").lexically_normal().native() == "");
+		CHECK(fs::path(".").lexically_normal().native() == ".");
+		CHECK(fs::path("/").lexically_normal().native() == "/");
+		CHECK(fs::path("/////").lexically_normal().native() == "/");
+
+		CHECK(fs::path("..").lexically_normal().native() == "..");
+		CHECK(fs::path("../..").lexically_normal().native() == "../..");
+
+		CHECK(fs::path("../foo").lexically_normal().native() == "../foo");
+		CHECK(fs::path("/../..").lexically_normal().native() == "/");
+		CHECK(fs::path("/../../").lexically_normal().native() == "/");
+
+
+		CHECK(fs::path("bleh/..").lexically_normal().native() == ".");
+		CHECK(fs::path("bleh/../..").lexically_normal().native() == "..");
+
+}
 
 TEST_CASE("path iterator", "[path]") {
 

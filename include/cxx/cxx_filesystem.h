@@ -282,6 +282,11 @@ namespace filesystem {
 			return empty() || _path[0] != '/';
 		}
 
+		// generation
+		path lexically_normal() const;
+		path lexically_relative(const path& base) const;
+		path lexically_proximate(const path& base) const;
+
 		// iterators
 		class iterator;
 		typedef iterator const_iterator;
@@ -606,6 +611,9 @@ namespace filesystem {
 	path canonical(const path& p, const path& base);
 	path canonical(const path& p, error_code& ec);
 	path canonical(const path& p, const path& base, error_code& ec);
+
+	path weakly_canonical(const path& p);
+	path weakly_canonical(const path& p, error_code& ec);
 
 	void copy(const path& from, const path& to);
 	void copy(const path& from, const path& to, error_code& ec) noexcept;
