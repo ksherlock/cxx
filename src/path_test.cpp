@@ -131,6 +131,15 @@ TEST_CASE("lexically_normal", "[path]") {
 
 }
 
+TEST_CASE("parent_path", "[path]") {
+	CHECK(fs::path("/var/tmp/example.txt").parent_path().native() == "/var/tmp");
+	CHECK(fs::path("/var/tmp/.").parent_path().native() == "/var/tmp");
+	CHECK(fs::path("/var/tmp////foo").parent_path().native() == "/var/tmp");
+	CHECK(fs::path("/").parent_path().native() == "");
+	CHECK(fs::path("/.").parent_path().native() == "/");
+	CHECK(fs::path("/////").parent_path().native() == "");
+}
+
 TEST_CASE("path iterator", "[path]") {
 
 	SECTION("") {

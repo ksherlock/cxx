@@ -2,6 +2,14 @@
 #include <cxx/cxx_filesystem.h>
 
 
+/*
+   some fs normalization proposals require an explicit /. at the end
+   to indicate a directory is a directory.
+*/
+//#define VMS_SUPPORT
+
+
+
 namespace filesystem {
 
 
@@ -154,7 +162,7 @@ namespace filesystem {
 		if (empty()) return *this;
 		if (!_info.valid) study();
 
-		if (_info.special == separator) return path_empty;
+		if (_info.special == slash_only) return path_empty;
 		if (_info.special == implicit_dot) return path_empty;
 
 		if (_info.stem == 0) return *this;
@@ -168,7 +176,7 @@ namespace filesystem {
 		if (empty()) return *this;
 		if (!_info.valid) study();
 
-		if (_info.special == separator) return path_empty;
+		if (_info.special == slash_only) return path_empty;
 		if (_info.special == implicit_dot) return path_empty;
 
 		return _path.substr(_info.stem, _info.extension - _info.stem);
@@ -182,6 +190,14 @@ namespace filesystem {
 		return _path.substr(_info.extension);
 	}
 
+	bool path::remove_trailing_slashes() {
+		if (_path.empty()) return false;
+		if (_path.back() != separator) return false;
+
+		do { _path.pop_back(); } while (!_path.empty() && _path.back() == separator);
+		invalidate();
+		return true;
+	}
 
 	bool path::has_parent_path() const
 	{
@@ -348,20 +364,6 @@ namespace filesystem {
 	}
 
 
-	size_t path::iterator::next() {
-		if (_index == 0 && _data->front() == separator) {
-			_current = "/";
-			return 1;
-		}
-		auto pos = _data->find(separator, _index);
-		if (pos == _data->npos) {
-			_current = _data->substr(_index);
-			return _data->length();
-		}
-		_current = _data->substr(_index, pos - _index);
-		return pos;
-
-	}
 
 #pragma mark - generation
 
@@ -425,6 +427,21 @@ namespace filesystem {
 	}
 
 #pragma mark - iteration
+
+	size_t path::iterator::next() {
+		if (_index == 0 && _data->front() == separator) {
+			_current = "/";
+			return 1;
+		}
+		auto pos = _data->find(separator, _index);
+		if (pos == _data->npos) {
+			_current = _data->substr(_index);
+			return _data->length();
+		}
+		_current = _data->substr(_index, pos - _index);
+		return pos;
+
+	}
 
 	path::iterator& path::iterator::operator++() {
 		_current.clear();

@@ -34,6 +34,12 @@ namespace filesystem {
 		typedef std::basic_string<value_type> string_type;
 		static constexpr value_type preferred_separator = '/';
 
+		enum format {
+			native_format,
+			generic_format,
+			auto_format
+		};
+
 
 		// constructors and destructor
 		path() = default;
@@ -43,19 +49,22 @@ namespace filesystem {
 			p.invalidate();
 		}
 
+		path(string_type&& source, format fmt = auto_format) :
+			_path(std::move(source)) {}
+
 		template<class Source>
-		path(Source const& source) :
+		path(Source const& source, format fmt = auto_format) :
 			_path(source) {}
 
 		template <class InputIterator>
-		path(InputIterator begin, InputIterator end) :
+		path(InputIterator begin, InputIterator end, format fmt = auto_format) :
 			_path(begin, end) {}
 
 		template <class Source>
-		path(Source const& source, const std::locale& loc);
+		path(Source const& source, const std::locale& loc, format fmt = auto_format);
 
 		template <class InputIterator>
-		path(InputIterator begin, InputIterator end, const std::locale& loc);
+		path(InputIterator begin, InputIterator end, const std::locale& loc, format fmt = auto_format);
 
 		~path() = default;
 
@@ -336,8 +345,9 @@ namespace filesystem {
 		void study() const;
 		path &append_common(const std::string &s);
 
+		path canonical_common(bool weakly, std::error_code &ec) const;
 
-
+		bool remove_trailing_slashes();
 
 		string_type _path;
 
