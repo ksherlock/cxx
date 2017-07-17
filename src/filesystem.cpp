@@ -267,9 +267,20 @@ namespace filesystem {
 		return tmp;
 	}
 
-	path absolute(const path &p) {
+	path absolute(const path &p, std::error_code &ec) {
+		ec.clear();
 		if (p.is_absolute()) return p;
-		return absolute(p, current_path());
+		path rv = current_path(ec);
+		if (!ec) rv /= p;
+		return rv;
+	}
+
+	path absolute(const path &p) {
+		std::error_code ec;
+		path rv = absolute(p, ec);
+		if (ec)
+			throw filesystem_error("filesystem::absolute", p, ec);
+		return rv;
 	}
 
 
@@ -281,13 +292,6 @@ namespace filesystem {
 		return rv;
 	}
 
-	path canonical(const path& p, const path& base) {
-		error_code ec;
-		path rv = canonical(p, base, ec);
-		if (ec) 
-			throw filesystem_error("filesystem::canonical", p, ec);
-		return rv;
-	}
 
 	path canonical(const path& p, error_code& ec) {
 		char *cp;
@@ -299,25 +303,6 @@ namespace filesystem {
 		ec = error_code(errno, std::generic_category());
 		return path();
 	}
-
-	path canonical(const path& p, const path& base, error_code& ec) {
-
-		char *cp;
-		char buffer[PATH_MAX+1];
-		
-		ec.clear();
-
-		if (p.is_absolute()) cp = realpath(p.c_str(), buffer);
-		else {
-			path tmp = base;
-			tmp /= p;
-			cp = realpath(tmp.c_str(), buffer);
-		}
-		if (cp) return path(cp);
-		ec = error_code(errno, std::generic_category());
-		return path();
-	}
-
 
 
 
