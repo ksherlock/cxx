@@ -549,7 +549,9 @@ namespace filesystem {
 	{
 		public:
 		// constructors
-		explicit file_status(file_type ft = file_type::none, perms prms = perms::unknown) noexcept:
+		file_status() noexcept : file_status(file_type::none) {}
+
+		explicit file_status(file_type ft, perms prms = perms::unknown) noexcept:
 			_ft(ft), _prms(prms) {}
 
 		file_status(const file_status&) noexcept = default;
