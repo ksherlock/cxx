@@ -196,7 +196,7 @@ TEST_CASE("path iterator", "[path]") {
 
 
 		REQUIRE(iter != end);
-		CHECK((*iter).native() == ".");
+		CHECK((*iter).native() == "");
 		++iter;
 
 		CHECK(iter == end);
@@ -218,7 +218,7 @@ TEST_CASE("path iterator", "[path]") {
 
 
 		REQUIRE(iter != end);
-		CHECK((*iter).native() == ".");
+		CHECK((*iter).native() == "");
 		++iter;
 
 		CHECK(iter == end);

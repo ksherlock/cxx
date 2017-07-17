@@ -455,7 +455,7 @@ namespace filesystem {
 			while (_index < _data->size() && (*_data)[_index] == separator)
 				++_index;
 			if (_index == _data->size()) {
-				_current = ".";
+				_current = path_empty;
 				return *this;
 			}
 		}
