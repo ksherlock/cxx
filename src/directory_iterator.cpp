@@ -11,6 +11,7 @@ namespace filesystem {
 
 #pragma mark - directory_entry
 
+#if 0
 	directory_entry::directory_entry(const class path& p, file_status st, file_status symlink_st) :
 			_path(p), _st(st), _lst(symlink_st)
 	{}
@@ -22,41 +23,84 @@ namespace filesystem {
 		_lst = symlink_st;
 	}
 
-
-	#if 0
-	void directory_entry::replace_filename(const path& p, file_status st, file_status symlink_st)
+	void directory_entry::replace_filename(const class path& p, file_status st, file_status symlink_st)
 	{
-
-
+		_path.replace_filename(p);
+		_st = st;
+		_lst = symlink_st;
 	}
-	#endif
+
+#endif
+
+	directory_entry::directory_entry(const class path& p) :
+			_path(p)
+	{
+		refresh();
+	}
+
+	directory_entry::directory_entry(const class path& p, std::error_code &ec) :
+			_path(p)
+	{
+		refresh(ec);
+	}
+
+
+
+	void directory_entry::assign(const class path& p) {
+		_path = p;
+		refresh();
+	}
+
+	void directory_entry::assign(const class path& p, std::error_code &ec) {
+		_path = p;
+		refresh(ec);
+	}
+
+
+	void directory_entry::replace_filename( const class path& p ) {
+		_path.replace_filename(p);
+		refresh();
+	}
+
+	void directory_entry::replace_filename( const class path& p, std::error_code& ec ) {
+		_path.replace_filename(p);
+		refresh(ec);
+	}
+
+	void directory_entry::refresh() {
+		_st = _lst = file_status(file_type::none);
+		_st = _lst = filesystem::symlink_status(_path);
+		if (filesystem::is_symlink(_lst)) {
+			_st = filesystem::status(_path);
+		}
+	}
+
+	void directory_entry::refresh(std::error_code &ec) {
+		_st = _lst = file_status(file_type::none);
+
+		_st = _lst = filesystem::symlink_status(_path, ec);
+		if (ec) return;
+
+		if (filesystem::is_symlink(_lst)) {
+			_st = filesystem::status(_path, ec);
+			if (ec) return;
+		}
+	}
 
 	file_status directory_entry::status() const {
 
-		if (!status_known(_st))
-		{
-			if (status_known(_lst) && ! is_symlink(_lst)) {
-				_st = _lst;
-			} else { 
-				_st = filesystem::status(_path);
-			}
-		}
-
+		if (!filesystem::status_known(_st))
+			_st = filesystem::status(_path);
 		return _st;
 	}
 
 	file_status directory_entry::status(error_code& ec) const noexcept {
 
-		if (!status_known(_st))
-		{
-			if (status_known(_lst) && ! is_symlink(_lst)) {
-				_st = _lst;
-			} else { 
-				_st = filesystem::status(_path, ec);
-			}
-		}
+		ec.clear();
+		if (!filesystem::status_known(_st))
+			_lst = filesystem::status(_path, ec);
 
-		return _st;
+		return _lst;
 	}
 
 	file_status directory_entry::symlink_status() const {

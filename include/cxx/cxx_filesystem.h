@@ -34,6 +34,12 @@ namespace filesystem {
 		typedef std::basic_string<value_type> string_type;
 		static constexpr value_type preferred_separator = '/';
 
+		enum format {
+			native_format,
+			generic_format,
+			auto_format
+		};
+
 
 		// constructors and destructor
 		path() = default;
@@ -43,19 +49,22 @@ namespace filesystem {
 			p.invalidate();
 		}
 
+		path(string_type&& source, format fmt = auto_format) :
+			_path(std::move(source)) {}
+
 		template<class Source>
-		path(Source const& source) :
+		path(Source const& source, format fmt = auto_format) :
 			_path(source) {}
 
 		template <class InputIterator>
-		path(InputIterator begin, InputIterator end) :
+		path(InputIterator begin, InputIterator end, format fmt = auto_format) :
 			_path(begin, end) {}
 
 		template <class Source>
-		path(Source const& source, const std::locale& loc);
+		path(Source const& source, const std::locale& loc, format fmt = auto_format);
 
 		template <class InputIterator>
-		path(InputIterator begin, InputIterator end, const std::locale& loc);
+		path(InputIterator begin, InputIterator end, const std::locale& loc, format fmt = auto_format);
 
 		~path() = default;
 
@@ -282,6 +291,11 @@ namespace filesystem {
 			return empty() || _path[0] != '/';
 		}
 
+		// generation
+		path lexically_normal() const;
+		path lexically_relative(const path& base) const;
+		path lexically_proximate(const path& base) const;
+
 		// iterators
 		class iterator;
 		typedef iterator const_iterator;
@@ -331,8 +345,9 @@ namespace filesystem {
 		void study() const;
 		path &append_common(const std::string &s);
 
+		path canonical_common(bool weakly, std::error_code &ec) const;
 
-
+		bool remove_trailing_slashes();
 
 		string_type _path;
 
@@ -464,10 +479,6 @@ namespace filesystem {
 
 		unknown = 0xffff,
 
-		add_perms = 0x10000,
-		remove_perms = 0x20000,
-		resolve_symlinks = 0x40000,
-
 	};
 
 	inline perms operator &(perms a, perms b) noexcept {
@@ -498,11 +509,49 @@ namespace filesystem {
 		return a = a ^ b;
 	}
 
+	enum class perm_options {
+		replace = 0x01,
+		add = 0x02,
+		remove = 0x04,
+		nofollow = 0x08,
+	};
+
+	inline perm_options operator &(perm_options a, perm_options b) noexcept {
+		return static_cast<perm_options>(static_cast<unsigned>(a) & static_cast<unsigned>(b));
+	}
+
+	inline perm_options operator |(perm_options a, perm_options b) noexcept {
+		return static_cast<perm_options>(static_cast<unsigned>(a) | static_cast<unsigned>(b));
+	}
+
+	inline perm_options operator ^(perm_options a, perm_options b) noexcept {
+		return static_cast<perm_options>(static_cast<unsigned>(a) ^ static_cast<unsigned>(b));
+	}
+
+	inline perm_options operator ~(perm_options a) noexcept {
+		return static_cast<perm_options>(~ static_cast<unsigned>(a));
+	}
+
+	inline perm_options& operator &=(perm_options &a, perm_options b) noexcept {
+		return a = a & b;
+	}
+
+	inline perm_options& operator |=(perm_options &a, perm_options b) noexcept {
+		return a = a | b;
+	}
+
+	inline perm_options& operator ^=(perm_options &a, perm_options b) noexcept {
+		return a = a ^ b;
+	}
+
+
 	class file_status
 	{
 		public:
 		// constructors
-		explicit file_status(file_type ft = file_type::none, perms prms = perms::unknown) noexcept:
+		file_status() noexcept : file_status(file_type::none) {}
+
+		explicit file_status(file_type ft, perms prms = perms::unknown) noexcept:
 			_ft(ft), _prms(prms) {}
 
 		file_status(const file_status&) noexcept = default;
@@ -600,12 +649,13 @@ namespace filesystem {
 	void current_path(const path& p, error_code& ec) noexcept;
 
 	path absolute(const path& p);
-	path absolute(const path& p, const path& base);
+	path absolute(const path& p, error_code &ec);
 
 	path canonical(const path& p);
-	path canonical(const path& p, const path& base);
 	path canonical(const path& p, error_code& ec);
-	path canonical(const path& p, const path& base, error_code& ec);
+
+	path weakly_canonical(const path& p);
+	path weakly_canonical(const path& p, error_code& ec);
 
 	void copy(const path& from, const path& to);
 	void copy(const path& from, const path& to, error_code& ec) noexcept;
@@ -769,8 +819,9 @@ namespace filesystem {
 	void last_write_time(const path& p, file_time_type new_time);
 	void last_write_time(const path& p, file_time_type new_time, error_code& ec) noexcept;
 
-	void permissions(const path& p, perms prms);
+	void permissions(const path& p, perms prms, perm_options opts=perm_options::replace);
 	void permissions(const path& p, perms prms, error_code& ec) noexcept;
+	void permissions(const path& p, perms prms, perm_options opts, error_code& ec) noexcept;
 
 	path read_symlink(const path& p);
 	path read_symlink(const path& p, error_code& ec);
@@ -789,8 +840,6 @@ namespace filesystem {
 	bool status_known(file_status s) noexcept;
 	file_status symlink_status(const path& p);
 	file_status symlink_status(const path& p, error_code& ec) noexcept;
-	path system_complete(const path& p);
-	path system_complete(const path& p, error_code& ec);
 	path temp_directory_path();
 	path temp_directory_path(error_code& ec) noexcept;
 
@@ -805,28 +854,64 @@ namespace filesystem {
 		directory_entry() = default;
 		directory_entry(const directory_entry&) = default;
 		directory_entry(directory_entry&&) noexcept = default;
-		explicit directory_entry(const path& p, file_status st=file_status(), file_status symlink_st=file_status());
+
+		explicit directory_entry(const class path& p);
+		directory_entry(const class path& p, error_code& ec);
 
 		~directory_entry() = default;
 
-		// modifiers
+		// assignments
 		directory_entry& operator=(const directory_entry&) = default;
 		directory_entry& operator=(directory_entry&&) noexcept = default;
-		void assign(const path& p, file_status st=file_status(),
-			file_status symlink_st=file_status());
-		void replace_filename(const path& p, file_status st=file_status(),
-			file_status symlink_st=file_status());
+
+		// modifiers
+
+
+		void assign(const class path& p);
+		void assign(const class path& p, error_code& ec);
+		void replace_filename(const class path& p);
+		void replace_filename(const class path& p, error_code& ec);
+		void refresh();
+		void refresh(error_code& ec);
 
 
 		// observers
-		const filesystem::path&  path() const noexcept {
+		const class path&  path() const noexcept {
 			return _path;
 		}
 
-		file_status  status() const;
-		file_status  status(error_code& ec) const noexcept;
-		file_status  symlink_status() const;
-		file_status  symlink_status(error_code& ec) const noexcept;
+		operator const class path&() const noexcept {
+			return _path;
+		}
+
+		bool exists() const;
+		bool exists(error_code& ec) const noexcept;
+		bool is_block_file() const;
+		bool is_block_file(error_code& ec) const noexcept;
+		bool is_character_file() const;
+		bool is_character_file(error_code& ec) const noexcept;
+		bool is_directory() const;
+		bool is_directory(error_code& ec) const noexcept;
+		bool is_fifo() const;
+		bool is_fifo(error_code& ec) const noexcept;
+		bool is_other() const;
+		bool is_other(error_code& ec) const noexcept;
+		bool is_regular_file() const;
+		bool is_regular_file(error_code& ec) const noexcept;
+		bool is_socket() const;
+		bool is_socket(error_code& ec) const noexcept;
+		bool is_symlink() const;
+		bool is_symlink(error_code& ec) const noexcept;
+		uintmax_t file_size() const;
+		uintmax_t file_size(error_code& ec) const noexcept;
+		uintmax_t hard_link_count() const;
+		uintmax_t hard_link_count(error_code& ec) const noexcept;
+		file_time_type last_write_time() const;
+		file_time_type last_write_time(error_code& ec) const noexcept;
+		file_status status() const;
+		file_status status(error_code& ec) const noexcept;
+		file_status symlink_status() const;
+		file_status symlink_status(error_code& ec) const noexcept;
 
 
 		bool operator< (const directory_entry& rhs) const noexcept;
@@ -838,6 +923,12 @@ namespace filesystem {
 
 
 	private:
+
+		explicit directory_entry(const class path& p, file_status st, file_status symlink_st);
+		void assign(const class path& p, file_status st, file_status symlink_st);
+		void replace_filename(const class path& p, file_status st, file_status symlink_st);
+
+		friend class directory_iterator;
 		class path _path;
 		mutable file_status _st;
 		mutable file_status _lst;
