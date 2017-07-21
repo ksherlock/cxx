@@ -114,10 +114,13 @@ void mapped_file_base::open_common(const T& p, mapmode flags, size_t length, siz
 	auto mh_close = make_unique_resource(mh, CloseHandle);
 
 
+	ULARGE_INTEGER ll;
+	ll.QuadPart = offset;
+
 	_data = MapViewOfFileEx(mh, 
 		access, 
-		(DWORD)(offset >> 32), 
-		(DWORD)offset, 
+		ll.HighPart,
+		ll.LowPart,
 		length, 
 		nullptr);
 	if (!_data)
@@ -186,10 +189,13 @@ void mapped_file_base::create_common(const T& p, size_t length, std::error_code 
 
 	auto mh_close = make_unique_resource(mh, CloseHandle);
 
+	ULARGE_INTEGER ll;
+	ll.QuadPart = offset;
+
 	_data = MapViewOfFileEx(mh, 
 		access, 
-		(DWORD)(offset >> 32), 
-		(DWORD)offset, 
+		ll.HighPart,
+		ll.LowPart,
 		length, 
 		nullptr);
 
