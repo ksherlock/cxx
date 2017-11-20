@@ -80,6 +80,10 @@ public:
 
 
 	mapped_file() = default;
+	mapped_file(mapped_file &&);
+	mapped_file(const mapped_file &) = delete;
+
+
 	mapped_file(const std::string &p, mapmode flags = readonly, size_t length = -1, size_t offset = 0) {
 		open(p, flags, length, offset);
 	}
@@ -99,9 +103,28 @@ public:
 		open(p, flags, length, offset, ec);
 	}
 
+#ifdef _WIN32
+	mapped_file(const std::wstring &p, mapmode flags = readonly, size_t length = -1, size_t offset = 0) {
+		open(p, flags, length, offset);
+	}
 
-	mapped_file(mapped_file &&);
-	mapped_file(const mapped_file &) = delete;
+	mapped_file(const std::wstring &p, std::error_code &ec) noexcept {
+		open(p, readonly, -1, 0, ec);
+	}
+	mapped_file(const std::wstring &p, mapmode flags, std::error_code &ec) noexcept {
+		open(p, flags, -1, 0, ec);
+	}
+
+	mapped_file(const std::wstring &p, mapmode flags, size_t length, std::error_code &ec) noexcept {
+		open(p, flags, length, 0, ec);
+	}
+
+	mapped_file(const std::wstring &p, mapmode flags, size_t length, size_t offset, std::error_code &ec) noexcept {
+		open(p, flags, length, offset, ec);
+	}
+
+#endif
+
 
 	mapped_file &operator=(mapped_file &&);
 	mapped_file &operator=(const mapped_file &) = delete;
