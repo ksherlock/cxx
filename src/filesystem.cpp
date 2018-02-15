@@ -133,7 +133,7 @@ namespace filesystem {
 
 		struct stat st;
 		//if (fs_stat(p, &st, ec) < 0)
-		if (syscall(ec, ::stat, p.c_str(), &st)  < 0)
+		if (syscall(ec, ::stat, p.c_str(), &st) < 0)
 			throw filesystem_error("filesystem::file_size", p, ec);
 
 		return st.st_size;
@@ -149,6 +149,26 @@ namespace filesystem {
 			return static_cast<uintmax_t>(-1);
 
 		return st.st_size;
+	}
+
+	file_time_type last_write_time(const path& p) {
+		error_code ec;
+		auto tmp = last_write_time(p, ec);
+		if (ec) throw filesystem_error("filesystem::last_write_time", p, ec);
+		return tmp;
+	}
+
+	file_time_type last_write_time(const path& p, error_code& ec) noexcept {
+		using namespace std::chrono;
+
+		struct stat st;
+		if (syscall(ec, ::stat, p.c_str(), &st) < 0)
+			return file_time_type::min();
+
+		auto ns = nanoseconds(st.st_mtimespec.tv_nsec);
+		auto ms = microseconds(duration_cast<microseconds>(ns));
+		auto s = seconds(st.st_mtimespec.tv_sec);
+		return file_time_type(s + ms);
 	}
 
 
