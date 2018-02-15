@@ -1,0 +1,22 @@
+#cmakedefine HAVE_STAT_ST_MTIMESPEC
+#cmakedefine HAVE_STAT_ST_ATIMESPEC
+
+#cmakedefine HAVE_STAT_ST_MTIM
+#cmakedefine HAVE_STAT_ST_ATIM
+
+#cmakedefine HAVE_UTIMENSAT
+
+#if defined(HAVE_STAT_ST_MTIMESPEC)
+#define ST_MTIMESPEC st_mtimespec
+#elif defined(HAVE_STAT_ST_MTIM)
+#define ST_MTIMESPEC st_mtim
+#endif
+
+#if defined(HAVE_STAT_ST_ATIMESPEC)
+#define ST_ATIMESPEC st_atimespec
+#elif defined(HAVE_STAT_ST_ATIM)
+#define ST_ATIMESPEC st_atim
+#endif
+
+
+

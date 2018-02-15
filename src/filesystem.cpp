@@ -1,6 +1,7 @@
 #include <cxx/cxx_filesystem.h>
 
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <unistd.h>
 
 #include <cerrno>
@@ -8,6 +9,10 @@
 #include <unistd.h>
 #include <sys/param.h>
 #include <limits.h>
+#include <fcntl.h>
+
+
+#include "cxx_config.h"
 
 #ifndef PATH_MAX
 #define PATH_MAX 4096
@@ -99,6 +104,48 @@ namespace filesystem {
 			return file_status(file_type::unknown, prms);
 		}
 
+		template<class Dur>
+		int time_to_time(Dur dur, timespec &t, error_code &ec) {
+
+			using namespace std::chrono;
+
+			typedef nanoseconds SubSecType;
+
+			auto s = duration_cast<seconds>(dur);
+			auto ss = duration_cast<SubSecType>(dur - s);
+
+			if (ss.count() < 0) {
+				ss += seconds(1);
+				s -= seconds(1);
+			}
+
+			t.tv_sec = s.count();
+			t.tv_nsec = ss.count();
+			return 0;
+		}
+
+		template<class Dur>
+		int time_to_time(Dur dur, timeval &t, error_code &ec) {
+
+			using namespace std::chrono;
+
+			typedef microseconds SubSecType;
+
+			auto s = duration_cast<seconds>(dur);
+			auto ss = duration_cast<SubSecType>(dur - s);
+
+			if (ss.count() < 0) {
+				ss += seconds(1);
+				s -= seconds(1);
+			}
+
+			t.tv_sec = s.count();
+			t.tv_usec = ss.count();
+			return 0;
+		}
+
+
+
 	}
 
 	file_status status(const path& p) {
@@ -158,6 +205,8 @@ namespace filesystem {
 		return tmp;
 	}
 
+	/* these don't completely support times < epoch */
+
 	file_time_type last_write_time(const path& p, error_code& ec) noexcept {
 		using namespace std::chrono;
 
@@ -165,10 +214,60 @@ namespace filesystem {
 		if (syscall(ec, ::stat, p.c_str(), &st) < 0)
 			return file_time_type::min();
 
-		auto ns = nanoseconds(st.st_mtimespec.tv_nsec);
+		#if defined(ST_MTIMESPEC)
+		struct timespec ts = st.ST_MTIMESPEC;
+		auto ns = nanoseconds(ts.tv_nsec);
 		auto ms = microseconds(duration_cast<microseconds>(ns));
-		auto s = seconds(st.st_mtimespec.tv_sec);
+		auto s = seconds(ts.tv_sec);
 		return file_time_type(s + ms);
+		#else
+		auto s = seconds(st.st_mtime);
+		return file_time_type(s);
+		#endif
+
+	}
+
+	void last_write_time(const path& p, file_time_type new_time) {
+		std::error_code ec;
+		last_write_time(p, new_time, ec);
+		if (ec) throw filesystem_error("filesystem::last_write_time", p, ec);
+	}
+
+
+	void last_write_time(const path& p, file_time_type new_time, error_code& ec) noexcept {
+
+		using namespace std::chrono;
+
+		auto dur = new_time.time_since_epoch();
+
+		#if defined(HAVE_UTIMENSAT)
+
+		struct timespec times[2];
+		times[0].tv_sec = 0;
+		times[0].tv_nsec = UTIME_OMIT;
+
+		if (time_to_time(dur, times[1], ec) < 0) return;
+		syscall(ec, ::utimensat, AT_FDCWD, p.c_str(), times, 0);
+
+		#else
+
+		struct stat st;
+		struct timeval times[2];
+		if (syscall(ec, ::stat, p.c_str(), &st) < 0) return;
+
+		#if defined(ST_ATIMESPEC)
+		times[0].tv_sec = st.ST_ATIMESPEC.tv_sec;
+		times[0].tv_usec = duration_cast<microseconds>(nanoseconds(st.ST_ATIMESPEC.tv_nsec)).count();
+		#else
+		times[0].tv_sec = st.st_atime;
+		times[0].tv_usec = 0;
+		#endif
+
+		if (time_to_time(dur, times[1], ec) < 0) return;
+
+		syscall(ec, ::utimes, p.c_str(), times);
+
+		#endif
 	}
 
 
