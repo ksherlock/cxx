@@ -6,6 +6,8 @@
 
 #include <cerrno>
 #include <cstdio>
+#include <limits>
+
 #include <unistd.h>
 #include <sys/param.h>
 #include <limits.h>
@@ -115,8 +117,15 @@ namespace filesystem {
 			auto ss = duration_cast<SubSecType>(dur - s);
 
 			if (ss.count() < 0) {
+
 				ss += seconds(1);
 				s -= seconds(1);
+
+				if (s.count() < std::numeric_limits<decltype(t.tv_sec)>::min()) {
+					ec = std::make_error_code(std::errc::invalid_argument);
+					return -1;
+				}
+
 			}
 
 			t.tv_sec = s.count();
@@ -135,8 +144,14 @@ namespace filesystem {
 			auto ss = duration_cast<SubSecType>(dur - s);
 
 			if (ss.count() < 0) {
+
 				ss += seconds(1);
 				s -= seconds(1);
+
+				if (s.count() < std::numeric_limits<decltype(t.tv_sec)>::min()) {
+					ec = std::make_error_code(std::errc::invalid_argument);
+					return -1;
+				}
 			}
 
 			t.tv_sec = s.count();
@@ -204,8 +219,6 @@ namespace filesystem {
 		if (ec) throw filesystem_error("filesystem::last_write_time", p, ec);
 		return tmp;
 	}
-
-	/* these don't completely support times < epoch */
 
 	file_time_type last_write_time(const path& p, error_code& ec) noexcept {
 		using namespace std::chrono;
