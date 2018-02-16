@@ -113,19 +113,20 @@ namespace filesystem {
 
 			typedef nanoseconds SubSecType;
 
+			const auto min = std::numeric_limits<decltype(t.tv_sec)>::min();
+			const auto max = std::numeric_limits<decltype(t.tv_sec)>::max();
+
 			auto s = duration_cast<seconds>(dur);
 			auto ss = duration_cast<SubSecType>(dur - s);
 
 			if (ss.count() < 0) {
-
 				ss += seconds(1);
 				s -= seconds(1);
+			}
 
-				if (s.count() < std::numeric_limits<decltype(t.tv_sec)>::min()) {
-					ec = std::make_error_code(std::errc::invalid_argument);
-					return -1;
-				}
-
+			if (s.count() < min || s.count() > max) {
+				ec = std::make_error_code(std::errc::invalid_argument);
+				return -1;
 			}
 
 			t.tv_sec = s.count();
@@ -140,18 +141,20 @@ namespace filesystem {
 
 			typedef microseconds SubSecType;
 
+			const auto min = std::numeric_limits<decltype(t.tv_sec)>::min();
+			const auto max = std::numeric_limits<decltype(t.tv_sec)>::max();
+
 			auto s = duration_cast<seconds>(dur);
 			auto ss = duration_cast<SubSecType>(dur - s);
 
 			if (ss.count() < 0) {
-
 				ss += seconds(1);
 				s -= seconds(1);
+			}
 
-				if (s.count() < std::numeric_limits<decltype(t.tv_sec)>::min()) {
-					ec = std::make_error_code(std::errc::invalid_argument);
-					return -1;
-				}
+			if (s.count() < min || s.count() > max) {
+				ec = std::make_error_code(std::errc::invalid_argument);
+				return -1;
 			}
 
 			t.tv_sec = s.count();
