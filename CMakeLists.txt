@@ -8,6 +8,7 @@ set(CMAKE_CXX_EXTENSIONS FALSE)
 include(CheckCXXSourceCompiles)
 include(CheckIncludeFileCXX)
 include(CheckStructHasMember)
+include(CheckFunctionExists)
 
 CHECK_INCLUDE_FILE_CXX(filesystem CXX_HAVE_FILESYSTEM)
 CHECK_INCLUDE_FILE_CXX(experimental/filesystem CXX_HAVE_EXPERIMENTAL_FILESYSTEM)
