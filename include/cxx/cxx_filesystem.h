@@ -301,8 +301,14 @@ namespace filesystem {
 		typedef iterator const_iterator;
 
 
-		// standard says bi-directional.  this is currently an input-iterator.
-		class iterator : public std::iterator<std::input_iterator_tag, path> {
+		class iterator {
+		public:
+			using iterator_category = std::input_iterator_tag; /* std is bi-directional */
+			using value_type = path;
+			using difference_type = std::ptrdiff_t;
+			using pointer = path *;
+			using reference = path &;
+
 		private:
 			const string_type *_data = nullptr;
 			string_type _current;
@@ -935,9 +941,16 @@ namespace filesystem {
 	};
 
 
-	class directory_iterator : public std::iterator<std::input_iterator_tag, directory_entry>
+	class directory_iterator
 	{
 	public:
+
+		using iterator_category = std::input_iterator_tag;
+		using value_type = directory_entry;
+		using difference_type = std::ptrdiff_t;
+		using pointer = directory_entry *;
+		using reference = directory_entry &;
+
 		// member functions
 		directory_iterator() noexcept = default;
 		explicit directory_iterator(const path& p);
