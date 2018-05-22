@@ -346,6 +346,16 @@ namespace filesystem {
 		return true;
 	}
 
+	void rename(const path& from, const path& to) {
+		error_code ec;
+		if ( syscall(ec, ::rename, from.c_str(), to.c_str()) < 0) {
+			throw filesystem_error("filesystem::rename", from, to, ec);
+		}
+	}
+	void rename(const path& from, const path& to, error_code& ec) noexcept {
+		syscall(ec, ::rename, from.c_str(), to.c_str());
+	}
+
 
 	path current_path() {
 		error_code ec;
