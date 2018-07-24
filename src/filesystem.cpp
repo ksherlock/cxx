@@ -356,6 +356,25 @@ namespace filesystem {
 		syscall(ec, ::rename, from.c_str(), to.c_str());
 	}
 
+	path read_symlink(const path& p) {
+		error_code ec;
+		path pp = read_symlink(p, ec);
+
+		if (ec) 
+			throw filesystem_error("filesystem::read_symlink", ec);
+
+		return pp;
+
+	}
+	path read_symlink(const path& p, std::error_code& ec) {
+		ssize_t rv;
+		char buffer[PATH_MAX];
+
+		rv = syscall(ec, ::readlink, p.c_str(), buffer, PATH_MAX);
+		if (rv < 0) return path();
+		return path(buffer, buffer + rv);
+	}
+
 
 	path current_path() {
 		error_code ec;
