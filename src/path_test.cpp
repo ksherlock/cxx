@@ -6,6 +6,16 @@
 
 namespace fs = FS_NAMESPACE;
 
+/*
+ * gcc experimental/filesystem - #define __cpp_lib_experimental_filesystem 201406
+ * gcc filesystem #define __cpp_lib_filesystem 201703
+ */
+
+#define HAS_LEXICALLY_NORMAL
+#if defined(__cpp_lib_experimental_filesystem) && __cpp_lib_experimental_filesystem < 201703
+#undef HAS_LEXICALLY_NORMAL
+#endif
+
 
 TEST_CASE("fs.path.append", "[std]") {
 
@@ -87,6 +97,10 @@ TEST_CASE("fs.path.query", "[std]") {
 	}
 }
 
+
+
+#if defined(HAS_LEXICALLY_NORMAL)
+
 TEST_CASE("fs.path.gen", "[std]") {
 
 	SECTION("lexically_normal") {
@@ -130,6 +144,8 @@ TEST_CASE("lexically_normal", "[path]") {
 		CHECK(fs::path("bleh/../..").lexically_normal().native() == "..");
 
 }
+
+#endif
 
 TEST_CASE("parent_path", "[path]") {
 	CHECK(fs::path("/var/tmp/example.txt").parent_path().native() == "/var/tmp");
