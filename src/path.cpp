@@ -116,6 +116,8 @@ namespace filesystem {
 
 	path &path::append_common(const std::string &s) {
 
+		invalidate();
+
 		// "foo" / "" -> "foo/"
 		if (_path.back() != separator) _path.push_back(separator);
 
@@ -127,7 +129,6 @@ namespace filesystem {
 		} else {
 			_path.append(s);
 		}
-
 		return *this;
 
 	}
