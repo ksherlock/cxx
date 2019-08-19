@@ -10,8 +10,8 @@ include(CheckIncludeFileCXX)
 include(CheckStructHasMember)
 include(CheckFunctionExists)
 
-CHECK_INCLUDE_FILE_CXX(filesystem CXX_HAVE_FILESYSTEM)
-CHECK_INCLUDE_FILE_CXX(experimental/filesystem CXX_HAVE_EXPERIMENTAL_FILESYSTEM)
+# CHECK_INCLUDE_FILE_CXX(filesystem CXX_HAVE_FILESYSTEM)
+# CHECK_INCLUDE_FILE_CXX(experimental/filesystem CXX_HAVE_EXPERIMENTAL_FILESYSTEM)
 
 CHECK_STRUCT_HAS_MEMBER("struct stat" st_mtimespec sys/stat.h HAVE_STAT_ST_MTIMESPEC)
 CHECK_STRUCT_HAS_MEMBER("struct stat" st_atimespec sys/stat.h HAVE_STAT_ST_ATIMESPEC)
@@ -28,59 +28,54 @@ SET(CMAKE_EXTRA_INCLUDE_FILES)
 # and filesystem (c++17 ONLY).
 # therefore, we need to check everything.
 
-if (CXX_HAVE_FILESYSTEM)
-	CHECK_CXX_SOURCE_COMPILES("
-		#include <filesystem>
-		namespace fs = std::experimental::filesystem;
-		int main() { return 0; }
-		"
-		CXX_STD_EXPERIMENTAL_FILESYSTEM_NAMESPACE_1)
+CHECK_CXX_SOURCE_COMPILES("
+	#include <filesystem>
+	namespace fs = std::filesystem;
+	int main() { return 0; }
+	"
+	CXX_FS_STD_STD)
 
-	CHECK_CXX_SOURCE_COMPILES("
-		#include <filesystem>
-		namespace fs = std::filesystem;
-		int main() { return 0; }
-		"
-		CXX_STD_FILESYSTEM_NAMESPACE_1)
+CHECK_CXX_SOURCE_COMPILES("
+	#include <filesystem>
+	namespace fs = std::experimental::filesystem;
+	int main() { return 0; }
+	"
+	CXX_FS_STD_EXP)
 
-		if (NOT CXX_STD_EXPERIMENTAL_FILESYSTEM_NAMESPACE_1 AND NOT CXX_STD_FILESYSTEM_NAMESPACE_1)
-			set(CXX_HAVE_FILESYSTEM FALSE)
-		endif()
-endif()
-if(CXX_HAVE_EXPERIMENTAL_FILESYSTEM)
-	CHECK_CXX_SOURCE_COMPILES("
-		#include <experimental/filesystem>
-		namespace fs = std::experimental::filesystem;
-		int main() { return 0; }
-		"
-		CXX_STD_EXPERIMENTAL_FILESYSTEM_NAMESPACE_2)
+CHECK_CXX_SOURCE_COMPILES("
+	#include <experimental/filesystem>
+	namespace fs = std::filesystem;
+	int main() { return 0; }
+	"
+	CXX_FS_EXP_STD)
 
-	CHECK_CXX_SOURCE_COMPILES("
-		#include <experimental/filesystem>
-		namespace fs = std::filesystem;
-		int main() { return 0; }
-		"
-		CXX_STD_FILESYSTEM_NAMESPACE_2)
+CHECK_CXX_SOURCE_COMPILES("
+	#include <experimental/filesystem>
+	namespace fs = std::experimental::filesystem;
+	int main() { return 0; }
+	"
+	CXX_FS_EXP_EXP)
 
-		if (NOT CXX_STD_EXPERIMENTAL_FILESYSTEM_NAMESPACE_2 AND NOT CXX_STD_FILESYSTEM_NAMESPACE_2)
-			set(CXX_HAVE_EXPERIMENTAL_FILESYSTEM FALSE)
-		endif()
-endif()
 
-if(CXX_HAVE_FILESYSTEM)
+
+
+
+if(CXX_FS_STD_STD OR CXX_FS_STD_EXP)
 	set(FS_HEADER "<filesystem>")
-elseif(CXX_HAVE_EXPERIMENTAL_FILESYSTEM)
+elseif(CXX_FS_EXP_STD OR CXX_FS_EXP_EXP)
 	set(FS_HEADER "<experimental/filesystem>")
 else()
 	set(FS_HEADER "<cxx/cxx_filesystem.h>")
 endif()
 
-if(CXX_STD_FILESYSTEM_NAMESPACE_1 OR CXX_STD_FILESYSTEM_NAMESPACE_2)
+if(CXX_FS_STD_STD OR CXX_FS_EXP_STD)
 	set(FS_NAMESPACE "std::filesystem")
 	set(IMPORT_FS_NAMESPACE "namespace filesystem = std::filesystem;")
-elseif(CXX_STD_EXPERIMENTAL_FILESYSTEM_NAMESPACE_1 OR CXX_STD_EXPERIMENTAL_FILESYSTEM_NAMESPACE_2)
+	set(CXX_HAVE_FILESYSTEM 1)
+elseif(CXX_FS_STD_EXP OR CXX_FS_EXP_EXP)
 	set(FS_NAMESPACE "std::experimental::filesystem")
 	set(IMPORT_FS_NAMESPACE "namespace filesystem = std::experimental::filesystem;")
+	set(CXX_HAVE_EXPERIMENTAL_FILESYSTEM 1)
 else()
 	set(FS_NAMESPACE "filesystem")
 	set(IMPORT_FS_NAMESPACE " ")
