@@ -24,7 +24,9 @@ SET(CMAKE_EXTRA_INCLUDE_FILES sys/stat.h)
 CHECK_FUNCTION_EXISTS(utimensat HAVE_UTIMENSAT)
 SET(CMAKE_EXTRA_INCLUDE_FILES)
 
-
+# gcc 8.3.0 has experimental/filesystem (c++14)
+# and filesystem (c++17 ONLY).
+# therefore, we need to check everything.
 
 if (CXX_HAVE_FILESYSTEM)
 	CHECK_CXX_SOURCE_COMPILES("
@@ -32,28 +34,37 @@ if (CXX_HAVE_FILESYSTEM)
 		namespace fs = std::experimental::filesystem;
 		int main() { return 0; }
 		"
-		CXX_STD_EXPERIMENTAL_FILESYSTEM_NAMESPACE)
+		CXX_STD_EXPERIMENTAL_FILESYSTEM_NAMESPACE_1)
 
 	CHECK_CXX_SOURCE_COMPILES("
 		#include <filesystem>
 		namespace fs = std::filesystem;
 		int main() { return 0; }
 		"
-		CXX_STD_FILESYSTEM_NAMESPACE)
-elseif(CXX_HAVE_EXPERIMENTAL_FILESYSTEM)
+		CXX_STD_FILESYSTEM_NAMESPACE_1)
+
+		if (NOT CXX_STD_EXPERIMENTAL_FILESYSTEM_NAMESPACE_1 AND NOT CXX_STD_FILESYSTEM_NAMESPACE_1)
+			unset(CXX_HAVE_FILESYSTEM)
+		endif()
+endif()
+if(CXX_HAVE_EXPERIMENTAL_FILESYSTEM)
 	CHECK_CXX_SOURCE_COMPILES("
 		#include <experimental/filesystem>
 		namespace fs = std::experimental::filesystem;
 		int main() { return 0; }
 		"
-		CXX_STD_EXPERIMENTAL_FILESYSTEM_NAMESPACE)
+		CXX_STD_EXPERIMENTAL_FILESYSTEM_NAMESPACE_2)
 
 	CHECK_CXX_SOURCE_COMPILES("
 		#include <experimental/filesystem>
 		namespace fs = std::filesystem;
 		int main() { return 0; }
 		"
-		CXX_STD_FILESYSTEM_NAMESPACE)
+		CXX_STD_FILESYSTEM_NAMESPACE_2)
+
+		if (NOT CXX_STD_EXPERIMENTAL_FILESYSTEM_NAMESPACE_2 AND NOT CXX_STD_FILESYSTEM_NAMESPACE_2)
+			unset(CXX_HAVE_EXPERIMENTAL_FILESYSTEM)
+		endif()
 endif()
 
 if(CXX_HAVE_FILESYSTEM)
@@ -64,10 +75,10 @@ else()
 	set(FS_HEADER "<cxx/cxx_filesystem.h>")
 endif()
 
-if(CXX_STD_FILESYSTEM_NAMESPACE)
+if(CXX_STD_FILESYSTEM_NAMESPACE_1 OR CXX_STD_FILESYSTEM_NAMESPACE_2)
 	set(FS_NAMESPACE "std::filesystem")
 	set(IMPORT_FS_NAMESPACE "namespace filesystem = std::filesystem;")
-elseif(CXX_HAVE_EXPERIMENTAL_FILESYSTEM)
+elseif(CXX_STD_EXPERIMENTAL_FILESYSTEM_NAMESPACE_1 OR CXX_STD_EXPERIMENTAL_FILESYSTEM_NAMESPACE_2)
 	set(FS_NAMESPACE "std::experimental::filesystem")
 	set(IMPORT_FS_NAMESPACE "namespace filesystem = std::experimental::filesystem;")
 else()
