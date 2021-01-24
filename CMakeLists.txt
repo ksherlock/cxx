@@ -28,6 +28,11 @@ SET(CMAKE_EXTRA_INCLUDE_FILES)
 # and filesystem (c++17 ONLY).
 # therefore, we need to check everything.
 
+#msvc w/ c++17 has filesystem.
+# if < c++17, has experimental/filesystem but now need to
+# #define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
+# to use it.
+
 CHECK_CXX_SOURCE_COMPILES("
 	#include <filesystem>
 	namespace fs = std::filesystem;
@@ -43,6 +48,7 @@ CHECK_CXX_SOURCE_COMPILES("
 	CXX_FS_STD_EXP)
 
 CHECK_CXX_SOURCE_COMPILES("
+	#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
 	#include <experimental/filesystem>
 	namespace fs = std::filesystem;
 	int main() { return 0; }
@@ -50,6 +56,7 @@ CHECK_CXX_SOURCE_COMPILES("
 	CXX_FS_EXP_STD)
 
 CHECK_CXX_SOURCE_COMPILES("
+	#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
 	#include <experimental/filesystem>
 	namespace fs = std::experimental::filesystem;
 	int main() { return 0; }
@@ -103,6 +110,12 @@ if (CXX_HAVE_EXPERIMENTAL_FILESYSTEM AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
         # Filesystem library extensions in <experimental/filesystem>."
         target_link_libraries(CXX_LIB -lstdc++fs)
 endif()
+
+if (CXX_HAVE_EXPERIMENTAL_FILESYSTEM AND MSVC)
+        target_compile_options(CXX_LIB PUBLIC -D_SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING)
+endif()
+
+
 
 add_executable(path_test src/path_test.cpp)
 target_link_libraries(path_test CXX_LIB)
