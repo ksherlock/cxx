@@ -27,7 +27,7 @@ template<
 	typedef std::size_t size_type;
 	typedef std::ptrdiff_t difference_type;
 
-	static constexpr size_type npos = size_type(-1);
+	static constexpr const size_type npos = -1;
 
 	/* constructors */
 	constexpr basic_string_view() = default;
@@ -42,6 +42,11 @@ template<
 
 	constexpr basic_string_view(const CharT* s) : basic_string_view(s, Traits::length(s))
 	{}
+
+	/* c++23 */
+	constexpr basic_string_view(std::nullptr_t) = delete;
+
+	/* constexpr */ basic_string_view& operator=( const basic_string_view& view ) noexcept = default;
 
 	/* iterators */
 
@@ -123,7 +128,7 @@ template<
 		return basic_string_view(_begin + pos, count);
 	}
 
-	constexpr int compare(basic_string_view v) const;
+	constexpr int compare(basic_string_view v) const noexcept;
 	constexpr int compare(size_type pos1, size_type count1,
 	                      basic_string_view v) const;
 	constexpr int compare(size_type pos1, size_type count1, basic_string_view v,
@@ -135,10 +140,33 @@ template<
 	                      const CharT* s, size_type count2) const;
 
 
-	constexpr size_type find(basic_string_view v, size_type pos = 0) const;
-	constexpr size_type find(CharT c, size_type pos = 0) const;
-	constexpr size_type find(const CharT* s, size_type pos, size_type count) const;
-	constexpr size_type find(const CharT* s, size_type pos = 0) const;
+	constexpr size_type find(basic_string_view v, size_type pos = 0) const {
+		return find(v.data(), pos, v.length());
+	}
+
+	/*constexpr*/ size_type find(CharT c, size_type pos = 0) const {
+		for (size_type i = pos; i < length(); ++i) {
+			if (Traits::eq(c, _begin[i])) return i;
+		}
+		return npos;
+	}
+
+	/*constexpr*/ size_type find(const CharT* s, size_type pos, size_type count) const {
+		if (count + pos > length()) return npos;
+		if (count == 0) return pos;
+
+		size_t l = length() - count + 1;
+		value_type c = *s;
+
+		for (size_t i = pos; i < l; ++i) {
+			if (Traits::eq(c, _begin[i]) && Traits::compare(_begin + i, s, count) == 0) return i;
+		}
+		return npos;
+
+	}
+	constexpr size_type find(const CharT* s, size_type pos = 0) const {
+		return find(s, pos, Traits::length(s));
+	}
 
 	constexpr size_type rfind(basic_string_view v, size_type pos = npos) const;
 	constexpr size_type rfind(CharT c, size_type pos = npos) const;
@@ -174,13 +202,92 @@ template<
 	constexpr size_type
 	find_last_not_of(const CharT* s, size_type pos = npos) const;
 
+	/* c++20 */
+
+	/* constexpr */ bool starts_with( basic_string_view sv ) const noexcept {
+		size_type l = sv.size();
+		return size() >= l ? Traits::compare(data(), sv.data(), l) == 0 : false;
+	}
+
+	constexpr bool starts_with( CharT c ) const noexcept {
+		return !empty() && Traits::eq(front(), c);
+	}
+
+	/* constexpr */ bool starts_with( const CharT* s ) const {
+		size_type l = Traits::length(s);
+		return size() >= l ? Traits::compare(data(), s, l) == 0 : false;
+	}
+
+	/* constexpr */ bool ends_with( basic_string_view sv ) const noexcept {
+		size_type l = sv.size();
+		return size() >= l ? Traits::compare(_end - l, sv.data(), l) == 0 : false;
+
+	}
+
+	constexpr bool ends_with( CharT c ) const noexcept {
+		return !empty() && Traits::eq(back(), c);
+	}
+	/* constexpr */ bool ends_with( const CharT* s ) const {
+		size_type l = Traits::length(s);
+		return size() >= l ? Traits::compare(_end - l, s, l) == 0 : false;
+	}
+
+	/* c++23 */
+	constexpr bool contains( basic_string_view sv ) const noexcept {
+		return find(sv) != npos;
+	}
+
+	constexpr bool contains( CharT c ) const noexcept {
+		return find(c) != npos;
+	}
+
+	constexpr bool contains( const CharT* s ) const {
+		return find(s) != npos;
+	}
+
 
 private:
-
 	const value_type * _begin = nullptr;
 	const value_type * _end = nullptr;
 
 };
+
+
+template< class CharT, class Traits >
+constexpr bool operator==( std::basic_string_view<CharT,Traits> lhs, 
+                           std::basic_string_view<CharT,Traits> rhs ) noexcept {
+	return (lhs.size() == rhs.size()) && (lhs.compare(rhs) == 0);
+}
+
+template< class CharT, class Traits >
+constexpr bool operator!=( std::basic_string_view<CharT,Traits> lhs, 
+                           std::basic_string_view<CharT,Traits> rhs ) noexcept {
+	return (lhs.size() != rhs.size()) || (lhs.compare(rhs) != 0);
+}
+
+template< class CharT, class Traits >
+constexpr bool operator<( std::basic_string_view<CharT,Traits> lhs, 
+                          std::basic_string_view<CharT,Traits> rhs ) noexcept {
+	return lhs.compare(rhs) < 0;
+}
+
+template< class CharT, class Traits >
+constexpr bool operator<=( std::basic_string_view<CharT,Traits> lhs, 
+                           std::basic_string_view<CharT,Traits> rhs ) noexcept {
+	return lhs.compare(rhs) <= 0;
+}
+
+template< class CharT, class Traits >
+constexpr bool operator>( std::basic_string_view<CharT,Traits> lhs, 
+                          std::basic_string_view<CharT,Traits> rhs ) noexcept {
+	return lhs.compare(rhs) > 0;
+}
+
+template< class CharT, class Traits >
+constexpr bool operator>=( std::basic_string_view<CharT,Traits> lhs, 
+                           std::basic_string_view<CharT,Traits> rhs ) noexcept {
+	return lhs.compare(rhs) >= 0;
+}
 
 
 typedef basic_string_view<char> string_view;

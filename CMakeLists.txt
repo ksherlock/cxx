@@ -120,6 +120,11 @@ endif()
 add_executable(path_test src/path_test.cpp)
 target_link_libraries(path_test CXX_LIB)
 
+add_executable(string_view_test src/string_view_test.cpp)
+target_link_libraries(string_view_test CXX_LIB)
+
+
 enable_testing()
 add_test(NAME path_test COMMAND path_test)
+add_test(NAME string_view_test COMMAND string_view_test)
 
