@@ -1,9 +1,12 @@
 cmake_minimum_required(VERSION 3.1)
 
 
+if (NOT CMAKE_CXX_STANDARD)
+# inherit values from parent project.
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS FALSE)
+endif()
 
 include(CheckCXXSourceCompiles)
 include(CheckIncludeFileCXX)
@@ -33,17 +36,26 @@ SET(CMAKE_EXTRA_INCLUDE_FILES)
 # #define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
 # to use it.
 
+
+#
+# MacOS - filesystem::path requires macos 10.15+
+#
+
+if (APPLE)
+	# if (CMAKE_OSX_DEPLOYMENT_TARGET)
+endif()
+
 CHECK_CXX_SOURCE_COMPILES("
 	#include <filesystem>
 	namespace fs = std::filesystem;
-	int main() { return 0; }
+	int main() { fs::path p; return 0; }
 	"
 	CXX_FS_STD_STD)
 
 CHECK_CXX_SOURCE_COMPILES("
 	#include <filesystem>
 	namespace fs = std::experimental::filesystem;
-	int main() { return 0; }
+	int main() { fs::path p; return 0; }
 	"
 	CXX_FS_STD_EXP)
 
@@ -51,7 +63,7 @@ CHECK_CXX_SOURCE_COMPILES("
 	#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
 	#include <experimental/filesystem>
 	namespace fs = std::filesystem;
-	int main() { return 0; }
+	int main() { fs::path p; return 0; }
 	"
 	CXX_FS_EXP_STD)
 
@@ -59,7 +71,7 @@ CHECK_CXX_SOURCE_COMPILES("
 	#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING
 	#include <experimental/filesystem>
 	namespace fs = std::experimental::filesystem;
-	int main() { return 0; }
+	int main() { fs::path p; return 0; }
 	"
 	CXX_FS_EXP_EXP)
 

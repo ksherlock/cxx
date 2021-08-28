@@ -1025,16 +1025,16 @@ namespace filesystem {
 namespace std
 {
 
-	inline void swap(filesystem::path& lhs, filesystem::path& rhs) noexcept {
+	inline void swap(::filesystem::path& lhs, ::filesystem::path& rhs) noexcept {
 		lhs.swap(rhs);
 	}
 
 	template<>
-	struct hash<filesystem::path>
+	struct hash<::filesystem::path>
 	{
-		std::size_t operator()(const filesystem::path &p) const
+		std::size_t operator()(const ::filesystem::path &p) const
 		{
-			std::hash<filesystem::path::string_type> hasher;
+			std::hash<::filesystem::path::string_type> hasher;
 			return hasher(p.native());
 		}
 	};
