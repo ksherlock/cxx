@@ -254,11 +254,11 @@ namespace filesystem {
 
 	path path::root_name() const {
 		/*
-		 * boost (unix) considers // or //component 
+		 * boost (unix) considers // or //component
 		 * to be a root name (and only those cases).
 		 *
 		 * I do not.
-		 */ 
+		 */
 
 		return path();
 	}
@@ -329,7 +329,7 @@ namespace filesystem {
 		_path += replacement._path;
 		invalidate();
 		return *this;
-	} 
+	}
 
 	// replace components.
 
@@ -338,7 +338,7 @@ namespace filesystem {
 
 		// poorly defined if this is special, like / or .
 		if (!_info.special) {
-			// _info.extension 
+			// _info.extension
 			_path.resize(_info.extension);
 			if (!replacement.empty()) {
 				// replacement may or may not have a leading .
@@ -357,7 +357,7 @@ namespace filesystem {
 
 		// poorly defined if this is special, like / or .
 		if (!_info.special) {
-			// _info.extension 
+			// _info.extension
 			_path.resize(_info.extension);
 			invalidate();
 		}
@@ -402,7 +402,7 @@ namespace filesystem {
 
 					if (rv.empty() || rv._info.special == explicit_dotdot) {
 						append_slash = false;
-						rv /= p;						
+						rv /= p;
 					} else {
 						append_slash = true;
 						rv.remove_filename();

@@ -81,7 +81,7 @@ namespace filesystem {
 				// case ELOOP ?
 
 				default:
-					return file_status(file_type::none);					
+					return file_status(file_type::none);
 				}
 			}
 
@@ -184,7 +184,7 @@ namespace filesystem {
 		file_status result = symlink_status(p, ec);
 		if (result.type() == file_type::none)
 			throw filesystem_error("filesystem::symlink_status", p, ec);
-		return result;		
+		return result;
 	}
 
 	file_status symlink_status(const path& p, error_code& ec) noexcept {
@@ -360,7 +360,7 @@ namespace filesystem {
 		error_code ec;
 		path pp = read_symlink(p, ec);
 
-		if (ec) 
+		if (ec)
 			throw filesystem_error("filesystem::read_symlink", ec);
 
 		return pp;
@@ -380,7 +380,7 @@ namespace filesystem {
 		error_code ec;
 		path p = current_path(ec);
 
-		if (ec) 
+		if (ec)
 			throw filesystem_error("filesystem::current_path", ec);
 
 		return p;
@@ -451,7 +451,7 @@ namespace filesystem {
 	path canonical(const path& p) {
 		error_code ec;
 		path rv = canonical(p, ec);
-		if (ec) 
+		if (ec)
 			throw filesystem_error("filesystem::canonical", p, ec);
 		return rv;
 	}

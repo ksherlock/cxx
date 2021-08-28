@@ -201,7 +201,7 @@ public:
 	const_iterator begin() const {
 		return cbegin();
 	}
-	
+
 	const_iterator end() const {
 		return cend();
 	}
@@ -220,7 +220,7 @@ public:
 	mapmode flags() const {
 		return _flags;
 	}
-	
+
 	void swap(mapped_file &rhs) {
 		base::swap(rhs);
 	}

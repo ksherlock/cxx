@@ -5,9 +5,9 @@
 #include <stdexcept>
 #include <iterator>
 
-template< 
-    class CharT, 
-    class Traits = std::char_traits<CharT> 
+template<
+    class CharT,
+    class Traits = std::char_traits<CharT>
 > class basic_string_view {
 	public:
 
@@ -63,7 +63,7 @@ template<
 	}
 
 	constexpr const_reverse_iterator crbegin() const {
-		return const_reverse_iterator(cbegin());		
+		return const_reverse_iterator(cbegin());
 	}
 
 	constexpr const_reverse_iterator rend() const {
@@ -184,7 +184,7 @@ template<
 	constexpr size_type find_last_of(const CharT* s, size_type pos = npos) const;
 
 
-	constexpr size_type 
+	constexpr size_type
 	find_first_not_of(basic_string_view v, size_type pos = 0) const;
 	constexpr size_type
 	find_first_not_of(CharT c, size_type pos = 0) const;
@@ -193,7 +193,7 @@ template<
 	constexpr size_type
 	find_first_not_of(const CharT* s, size_type pos = 0) const;
 
-	constexpr size_type 
+	constexpr size_type
 	find_last_not_of(basic_string_view v, size_type pos = npos) const;
 	constexpr size_type
 	find_last_not_of(CharT c, size_type pos = npos) const;
@@ -254,37 +254,37 @@ private:
 
 
 template< class CharT, class Traits >
-constexpr bool operator==( std::basic_string_view<CharT,Traits> lhs, 
+constexpr bool operator==( std::basic_string_view<CharT,Traits> lhs,
                            std::basic_string_view<CharT,Traits> rhs ) noexcept {
 	return (lhs.size() == rhs.size()) && (lhs.compare(rhs) == 0);
 }
 
 template< class CharT, class Traits >
-constexpr bool operator!=( std::basic_string_view<CharT,Traits> lhs, 
+constexpr bool operator!=( std::basic_string_view<CharT,Traits> lhs,
                            std::basic_string_view<CharT,Traits> rhs ) noexcept {
 	return (lhs.size() != rhs.size()) || (lhs.compare(rhs) != 0);
 }
 
 template< class CharT, class Traits >
-constexpr bool operator<( std::basic_string_view<CharT,Traits> lhs, 
+constexpr bool operator<( std::basic_string_view<CharT,Traits> lhs,
                           std::basic_string_view<CharT,Traits> rhs ) noexcept {
 	return lhs.compare(rhs) < 0;
 }
 
 template< class CharT, class Traits >
-constexpr bool operator<=( std::basic_string_view<CharT,Traits> lhs, 
+constexpr bool operator<=( std::basic_string_view<CharT,Traits> lhs,
                            std::basic_string_view<CharT,Traits> rhs ) noexcept {
 	return lhs.compare(rhs) <= 0;
 }
 
 template< class CharT, class Traits >
-constexpr bool operator>( std::basic_string_view<CharT,Traits> lhs, 
+constexpr bool operator>( std::basic_string_view<CharT,Traits> lhs,
                           std::basic_string_view<CharT,Traits> rhs ) noexcept {
 	return lhs.compare(rhs) > 0;
 }
 
 template< class CharT, class Traits >
-constexpr bool operator>=( std::basic_string_view<CharT,Traits> lhs, 
+constexpr bool operator>=( std::basic_string_view<CharT,Traits> lhs,
                            std::basic_string_view<CharT,Traits> rhs ) noexcept {
 	return lhs.compare(rhs) >= 0;
 }

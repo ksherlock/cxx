@@ -14,7 +14,7 @@ public:
 		// _begin is 0, _end is either npos or offset from 0,
 		// so no need to calculate a count.
 	}
-	
+
 	operator bool() const {
 		return _begin != std::string::npos;
 	}
@@ -31,7 +31,7 @@ public:
 	const std::string *operator ->() const {
 		return &_str;
 	}
-	
+
 private:
 	void increment() {
 		_str.clear();

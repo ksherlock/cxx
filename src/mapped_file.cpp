@@ -68,11 +68,11 @@ void mapped_file_base::open_common(const T& p, mapmode flags, size_t length, siz
 
 	if (is_open()) close();
 
-	fh = CreateFileX(p, 
+	fh = CreateFileX(p,
 		flags == readonly ? GENERIC_READ : GENERIC_READ | GENERIC_WRITE,
-		FILE_SHARE_READ, 
+		FILE_SHARE_READ,
 		nullptr,
-		OPEN_EXISTING, 
+		OPEN_EXISTING,
 		flags == readonly ? FILE_ATTRIBUTE_READONLY : FILE_ATTRIBUTE_NORMAL,
 		nullptr
 	);
@@ -117,11 +117,11 @@ void mapped_file_base::open_common(const T& p, mapmode flags, size_t length, siz
 	ULARGE_INTEGER ll;
 	ll.QuadPart = offset;
 
-	_data = MapViewOfFileEx(mh, 
-		access, 
+	_data = MapViewOfFileEx(mh,
+		access,
 		ll.HighPart,
 		ll.LowPart,
-		length, 
+		length,
 		nullptr);
 	if (!_data)
 		return set_or_throw_error(ec, "MapViewOfFileEx");
@@ -161,11 +161,11 @@ void mapped_file_base::create_common(const T& p, size_t length, std::error_code 
 
 	if (is_open()) close();
 
-	fh = CreateFileX(p, 
+	fh = CreateFileX(p,
 		GENERIC_READ | GENERIC_WRITE,
-		FILE_SHARE_READ, 
+		FILE_SHARE_READ,
 		nullptr,
-		CREATE_ALWAYS, 
+		CREATE_ALWAYS,
 		FILE_ATTRIBUTE_NORMAL,
 		nullptr
 	);
@@ -192,11 +192,11 @@ void mapped_file_base::create_common(const T& p, size_t length, std::error_code 
 	ULARGE_INTEGER ll;
 	ll.QuadPart = offset;
 
-	_data = MapViewOfFileEx(mh, 
-		access, 
+	_data = MapViewOfFileEx(mh,
+		access,
 		ll.HighPart,
 		ll.LowPart,
-		length, 
+		length,
 		nullptr);
 
 	if (!_data)
@@ -286,9 +286,9 @@ void mapped_file_base::open(const std::string& p, mapmode flags, size_t length, 
 
 	if (length == 0) return;
 
-	_data = ::mmap(0, length, 
-		flags == readonly ? PROT_READ : PROT_READ | PROT_WRITE, 
-		flags == priv ? MAP_PRIVATE : MAP_SHARED, 
+	_data = ::mmap(0, length,
+		flags == readonly ? PROT_READ : PROT_READ | PROT_WRITE,
+		flags == priv ? MAP_PRIVATE : MAP_SHARED,
 		fd, offset);
 
 	if (_data == MAP_FAILED) {
@@ -326,9 +326,9 @@ void mapped_file_base::create(const std::string& p, size_t length, std::error_co
 	}
 
 
-	_data = ::mmap(0, length, 
-		PROT_READ | PROT_WRITE, 
-		MAP_SHARED, 
+	_data = ::mmap(0, length,
+		PROT_READ | PROT_WRITE,
+		MAP_SHARED,
 		fd, offset);
 
 	if (_data == MAP_FAILED) {

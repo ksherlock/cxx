@@ -105,7 +105,7 @@ TEST_CASE("fs.path.gen", "[std]") {
 
 	SECTION("lexically_normal") {
 		CHECK(fs::path("foo/./bar/..").lexically_normal().native() == "foo/");
-		CHECK(fs::path("foo/.///bar/../").lexically_normal().native() == "foo/");	
+		CHECK(fs::path("foo/.///bar/../").lexically_normal().native() == "foo/");
 	}
 
 #if 0

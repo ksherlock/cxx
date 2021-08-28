@@ -8,7 +8,7 @@
 
 template <class charT, class traits, class A, class U>
 void erase(std::basic_string<charT, traits, A>& c, const U& value) {
-	c.erase(std::remove(c.begin(), c.end(), value), c.end());	
+	c.erase(std::remove(c.begin(), c.end(), value), c.end());
 }
 
 template <class charT, class traits, class A, class Predicate>

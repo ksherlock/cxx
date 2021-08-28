@@ -151,7 +151,7 @@ namespace filesystem {
 
 		path& operator+=(const string_type& x) {
 			invalidate();
-			_path += x;			
+			_path += x;
 			return *this;
 		}
 
@@ -163,7 +163,7 @@ namespace filesystem {
 
 		path& operator+=(value_type x) {
 			invalidate();
-			_path += x;			
+			_path += x;
 			return *this;
 		}
 
@@ -171,13 +171,13 @@ namespace filesystem {
 		path& operator+=(Source const& x) {
 			invalidate();
 			_path += x;
-			return *this;	
+			return *this;
 		}
 
 		template <class charT>
 		path& operator+=(charT x){
 			invalidate();
-			_path += x;			
+			_path += x;
 			return *this;
 		}
 
@@ -392,10 +392,10 @@ namespace filesystem {
 		return lhs.compare(rhs) <= 0;
 	}
 	inline bool operator> (const path& lhs, const path& rhs) noexcept {
-		return lhs.compare(rhs) > 0;		
+		return lhs.compare(rhs) > 0;
 	}
 	inline bool operator>=(const path& lhs, const path& rhs) noexcept {
-		return lhs.compare(rhs) >= 0;		
+		return lhs.compare(rhs) >= 0;
 	}
 	inline path operator/ (const path& lhs, const path& rhs) {
 		path tmp = lhs;
@@ -421,7 +421,7 @@ namespace filesystem {
 			system_error(ec, what_arg)
 		{}
 
-		filesystem_error(const std::string& what_arg, const path& p1, error_code ec) : 
+		filesystem_error(const std::string& what_arg, const path& p1, error_code ec) :
 			system_error(ec, what_arg), _p1(p1)
 		{}
 
@@ -734,7 +734,7 @@ namespace filesystem {
 		return is_block_file(status(p));
 	}
 	inline bool is_block_file(const path& p, error_code& ec) noexcept {
-		return is_block_file(status(p, ec));		
+		return is_block_file(status(p, ec));
 	}
 
 	inline bool is_character_file(file_status s) noexcept {
@@ -744,7 +744,7 @@ namespace filesystem {
 		return is_character_file(status(p));
 	}
 	inline bool is_character_file(const path& p, error_code& ec) noexcept {
-		return is_character_file(status(p, ec));		
+		return is_character_file(status(p, ec));
 	}
 
 	inline bool is_directory(file_status s) noexcept {
@@ -754,7 +754,7 @@ namespace filesystem {
 		return is_directory(status(p));
 	}
 	inline bool is_directory(const path& p, error_code& ec) noexcept {
-		return is_directory(status(p, ec));		
+		return is_directory(status(p, ec));
 	}
 
 	bool is_empty(const path& p);
@@ -768,7 +768,7 @@ namespace filesystem {
 		return is_fifo(status(p));
 	}
 	inline bool is_fifo(const path& p, error_code& ec) noexcept {
-		return is_fifo(status(p, ec));		
+		return is_fifo(status(p, ec));
 	}
 
 	inline bool is_socket(file_status s) noexcept {
@@ -778,7 +778,7 @@ namespace filesystem {
 		return is_socket(status(p));
 	}
 	inline bool is_socket(const path& p, error_code& ec) noexcept {
-		return is_socket(status(p, ec));		
+		return is_socket(status(p, ec));
 	}
 
 
@@ -789,7 +789,7 @@ namespace filesystem {
 		return is_symlink(status(p));
 	}
 	inline bool is_symlink(const path& p, error_code& ec) noexcept {
-		return is_symlink(status(p, ec));		
+		return is_symlink(status(p, ec));
 	}
 
 
@@ -806,7 +806,7 @@ namespace filesystem {
 	}
 
 	inline bool is_other(file_status s) noexcept {
-		return exists(s) && !is_regular_file(s) && ! is_directory(s) && !is_symlink(s);	
+		return exists(s) && !is_regular_file(s) && ! is_directory(s) && !is_symlink(s);
 	}
 
 	inline bool is_other(const path& p) {
@@ -814,11 +814,11 @@ namespace filesystem {
 	}
 
 	inline bool is_other(const path& p, error_code& ec) noexcept {
-		return is_other(status(p, ec));		
+		return is_other(status(p, ec));
 	}
 
 
-	
+
 
 	file_time_type last_write_time(const path& p);
 	file_time_type last_write_time(const path& p, error_code& ec) noexcept;
@@ -1039,6 +1039,6 @@ namespace std
 		}
 	};
 }
- 
+
 
 #endif

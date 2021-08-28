@@ -117,7 +117,7 @@ namespace filesystem {
 
 		if (!status_known(_lst))
 			_lst = filesystem::symlink_status(_path, ec);
-		
+
 		return _lst;
 	}
 

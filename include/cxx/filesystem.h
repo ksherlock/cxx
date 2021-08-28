@@ -11,7 +11,7 @@
 
 #define FS_HEADER "cxx_filesystem.h"
 #define FS_NAMESPACE filesystem
-#define IMPORT_FS_NAMESPACE  
+#define IMPORT_FS_NAMESPACE
 
 #include FS_HEADER
 

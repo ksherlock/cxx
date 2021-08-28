@@ -67,7 +67,7 @@ public:
 	}
 
 	operator bool() const {
-		return _active; 
+		return _active;
 	}
 
 	D& get_deleter() {
