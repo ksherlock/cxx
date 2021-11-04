@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.8)
 
 
 if (NOT CMAKE_CXX_STANDARD)
@@ -7,6 +7,9 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS FALSE)
 endif()
+
+# Honor language standard in try_compile() source-file signature.
+cmake_policy(SET CMP0067 NEW)
 
 include(CheckCXXSourceCompiles)
 include(CheckIncludeFileCXX)
