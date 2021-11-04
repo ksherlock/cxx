@@ -254,38 +254,38 @@ private:
 
 
 template< class CharT, class Traits >
-constexpr bool operator==( std::basic_string_view<CharT,Traits> lhs,
-                           std::basic_string_view<CharT,Traits> rhs ) noexcept {
+constexpr bool operator==( basic_string_view<CharT,Traits> lhs,
+                           basic_string_view<CharT,Traits> rhs ) noexcept {
 	return (lhs.size() == rhs.size()) && (lhs.compare(rhs) == 0);
 }
 
 template< class CharT, class Traits >
-constexpr bool operator!=( std::basic_string_view<CharT,Traits> lhs,
-                           std::basic_string_view<CharT,Traits> rhs ) noexcept {
+constexpr bool operator!=( basic_string_view<CharT,Traits> lhs,
+                           basic_string_view<CharT,Traits> rhs ) noexcept {
 	return (lhs.size() != rhs.size()) || (lhs.compare(rhs) != 0);
 }
 
 template< class CharT, class Traits >
-constexpr bool operator<( std::basic_string_view<CharT,Traits> lhs,
-                          std::basic_string_view<CharT,Traits> rhs ) noexcept {
+constexpr bool operator<( basic_string_view<CharT,Traits> lhs,
+                          basic_string_view<CharT,Traits> rhs ) noexcept {
 	return lhs.compare(rhs) < 0;
 }
 
 template< class CharT, class Traits >
-constexpr bool operator<=( std::basic_string_view<CharT,Traits> lhs,
-                           std::basic_string_view<CharT,Traits> rhs ) noexcept {
+constexpr bool operator<=( basic_string_view<CharT,Traits> lhs,
+                           basic_string_view<CharT,Traits> rhs ) noexcept {
 	return lhs.compare(rhs) <= 0;
 }
 
 template< class CharT, class Traits >
-constexpr bool operator>( std::basic_string_view<CharT,Traits> lhs,
-                          std::basic_string_view<CharT,Traits> rhs ) noexcept {
+constexpr bool operator>( basic_string_view<CharT,Traits> lhs,
+                          basic_string_view<CharT,Traits> rhs ) noexcept {
 	return lhs.compare(rhs) > 0;
 }
 
 template< class CharT, class Traits >
-constexpr bool operator>=( std::basic_string_view<CharT,Traits> lhs,
-                           std::basic_string_view<CharT,Traits> rhs ) noexcept {
+constexpr bool operator>=( basic_string_view<CharT,Traits> lhs,
+                           basic_string_view<CharT,Traits> rhs ) noexcept {
 	return lhs.compare(rhs) >= 0;
 }
 
